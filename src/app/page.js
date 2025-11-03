@@ -1,4 +1,6 @@
 import styles from "./page.module.css";
+import FeaturedCategories from "../components/FeaturedCategories";
+import TopOffers from "../components/TopOffers";
 
 export default function Home() {
   return (
@@ -13,6 +15,8 @@ export default function Home() {
           
         </div>
       </section>
+      <FeaturedCategories />
+      <TopOffers />
     </div>
   );
 }

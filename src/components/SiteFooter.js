@@ -1,7 +1,6 @@
 export default function SiteFooter() {
   return (
     <footer style={{
-      marginTop: 40,
       borderTop: "1px solid var(--color-border)",
       background: "var(--color-surface)",
       color: "var(--color-text)",
