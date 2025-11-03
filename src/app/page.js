@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import FeaturedCategories from "../components/FeaturedCategories";
 import TopOffers from "../components/TopOffers";
+import UploadPrescription from "../components/UploadPrescription";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
       </section>
       <FeaturedCategories />
       <TopOffers />
+      <UploadPrescription />
     </div>
   );
 }
