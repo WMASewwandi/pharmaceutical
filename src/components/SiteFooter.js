@@ -6,7 +6,7 @@ export default function SiteFooter() {
       background: "var(--color-surface)",
       color: "var(--color-text)",
     }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px" }}>
+      <div style={{ maxWidth: '100vw', margin: "0 auto", padding: "24px 20px" }}>
         <p style={{ color: "var(--color-muted-text)" }}>
           © {new Date().getFullYear()} Pharmacia. All rights reserved.
         </p>

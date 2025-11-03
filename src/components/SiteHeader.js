@@ -50,7 +50,7 @@ export default function SiteHeader() {
       transition: "background 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
     }}>
       <div style={{
-        maxWidth: 1200,
+        maxWidth: '100vw',
         margin: "0 auto",
         padding: "14px 20px",
         display: "flex",
