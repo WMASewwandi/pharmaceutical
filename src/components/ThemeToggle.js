@@ -22,7 +22,7 @@ export default function ThemeToggle() {
         borderRadius: 18,
         border: "1px solid var(--color-border)",
         background: "transparent",
-        color: "var(--color-text)",
+        color: "inherit",
         boxShadow: "var(--shadow-sm)",
       }}
     >

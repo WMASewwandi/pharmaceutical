@@ -3,15 +3,24 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import PhoneEnabledIcon from "@mui/icons-material/PhoneEnabled";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { Button, IconButton, Box } from "@mui/material";
+import Badge from "@mui/material/Badge";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useTheme } from "./ThemeProvider";
 
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const cartCount = 0; // TODO: wire to store
+  const helpline = "+94 11 234 5678";
+  const email = "help@pharmacia.com";
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -30,9 +39,8 @@ export default function SiteHeader() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
-    { href: "/upload", label: "Upload Prescription" },
-    { href: "/wellness", label: "Health & Wellness" },
     { href: "/categories", label: "Categories" },
+    { href: "/wellness", label: "Health & Wellness" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ];
@@ -50,10 +58,44 @@ export default function SiteHeader() {
       backdropFilter: scrolled ? "saturate(180%) blur(6px)" : "none",
       transition: "background 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
     }}>
+      {/* Top helpline bar */}
+      <div style={{
+        background: "var(--color-surface)",
+        color: "var(--color-text)",
+        borderBottom: "1px solid var(--color-border)",
+        fontSize: 12,
+        lineHeight: "24px",
+      }}>
+        <div style={{
+          maxWidth: '100vw',
+          margin: "0 auto",
+          padding: "2px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <a href={`tel:${helpline.replace(/\s+/g, "")}`} style={{ color: "inherit" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <PhoneEnabledIcon style={{ fontSize: 14 }} /> {helpline} 
+              </span>
+            </a>
+            {!isMobile && (
+              <a href={`mailto:${email}`} style={{ color: "inherit" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <EmailOutlinedIcon style={{ fontSize: 14 }} /> {email}
+                </span>
+              </a>
+            )}
+          </div>
+          {/* aligned to right */}
+        </div>
+      </div>
       <div style={{
         maxWidth: '100vw',
         margin: "0 auto",
-        padding: "14px 20px",
+        padding: "10px 20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -65,7 +107,7 @@ export default function SiteHeader() {
             Logo
           </Link>
           {!isMobile && (
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               {links.map((l) => {
                 const isActive = pathname === l.href;
                 return (
@@ -106,6 +148,26 @@ export default function SiteHeader() {
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          
+          {isMobile && (
+            <IconButton
+              href="/cart"
+              component={Link}
+              aria-label="Cart"
+              sx={{ border: "1px solid var(--color-border)", color: "inherit", width: 36, height: 36 }}
+              size="small"
+            >
+              <Badge badgeContent={cartCount} color="primary" showZero>
+                <ShoppingBagIcon fontSize="small" />
+              </Badge>
+            </IconButton>
+          )}
+          {/* mobile menu icon should be last; add theme toggle before it */}
+          {isMobile && (
+            <div style={{ width: 36, height: 36 }}>
+              <ThemeToggle />
+            </div>
+          )}
           {isMobile && (
             <IconButton
               aria-label="Open menu"
@@ -113,13 +175,29 @@ export default function SiteHeader() {
               sx={{
                 border: "1px solid var(--color-border)",
                 color: "inherit",
+                width: 36,
+                height: 36,
               }}
               size="small"
             >
               ☰
             </IconButton>
           )}
-          <ThemeToggle />
+          {!isMobile && (
+            <IconButton
+              href="/cart"
+              component={Link}
+              aria-label="Cart"
+              sx={{ border: "1px solid var(--color-border)", color: "inherit", width: 36, height: 36 }}
+              size="small"
+            >
+              <Badge badgeContent={cartCount} color="primary" showZero>
+                <ShoppingBagIcon fontSize="small" />
+              </Badge>
+            </IconButton>
+          )}
+          {/* Theme toggle only on desktop in the nav bar */}
+          {!isMobile && <ThemeToggle />}
           {!isMobile && (
             <IconButton
               href="/account"
@@ -152,9 +230,14 @@ export default function SiteHeader() {
           overflow: "hidden",
           boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
           zIndex: 60,
+          color: "var(--color-text)",
         }}>
           <nav style={{ display: "flex", flexDirection: "column", gap: 4, padding: 12 }}>
-            {[...links, { href: "/account", label: "Account" }].map((l) => {
+            {[...links,
+              { href: "/login", label: "Login / Register" },
+              { href: "/cart", label: "Cart" },
+              { href: "/account", label: "Account" },
+            ].map((l) => {
               const isActive = pathname === l.href;
               return (
                 <Link
