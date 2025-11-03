@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { Button, IconButton, Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -64,57 +65,77 @@ export default function SiteHeader() {
             Logo
           </Link>
           {!isMobile && (
-            <nav style={{ display: "flex", gap: 20 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
               {links.map((l) => {
                 const isActive = pathname === l.href;
                 return (
-                  <Link
+                  <Button
                     key={l.href}
+                    component={Link}
                     href={l.href}
-                    className={`navLink ${isActive ? "navLinkActive" : ""}`}
+                    disableRipple
+                    sx={{
+                      color: "inherit",
+                      textTransform: "none",
+                      px: 1,
+                      py: 1,
+                      position: "relative",
+                      '&::before': {
+                        content: '""',
+                        position: "absolute",
+                        inset: "-2px -8px",
+                        borderRadius: "10px",
+                        background: "var(--color-accent)",
+                        opacity: isActive ? 0.2 : 0,
+                        transform: isActive ? 'translateY(0) scale(1)' : 'translateY(4px) scale(0.96)',
+                        transition: "opacity 160ms ease, transform 200ms ease",
+                        zIndex: -1,
+                      },
+                      '&:hover': {
+                        color: "var(--color-primary)",
+                        transform: "translateY(-1px)",
+                        '&::before': { opacity: 0.16, transform: 'translateY(0) scale(1)' },
+                      },
+                    }}
                   >
                     {l.label}
-                  </Link>
+                  </Button>
                 );
               })}
-            </nav>
+            </Box>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {isMobile && (
-            <button
+            <IconButton
               aria-label="Open menu"
               onClick={() => setMenuOpen((v) => !v)}
-              style={{
-                background: "transparent",
+              sx={{
                 border: "1px solid var(--color-border)",
-                borderRadius: 8,
-                padding: "6px 10px",
                 color: "inherit",
               }}
+              size="small"
             >
               ☰
-            </button>
+            </IconButton>
           )}
           <ThemeToggle />
           {!isMobile && (
-            <Link
+            <IconButton
               href="/account"
+              component={Link}
               aria-label="Account"
               className="userIcon"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 36,
-                height: 36,
-                borderRadius: 18,
+              sx={{
                 border: "1px solid var(--color-border)",
                 color: "inherit",
+                width: 36,
+                height: 36,
               }}
+              size="small"
             >
               <AccountCircleIcon fontSize="small" />
-            </Link>
+            </IconButton>
           )}
         </div>
       </div>

@@ -3,6 +3,7 @@ import "./globals.css";
 import ThemeProvider from "../components/ThemeProvider";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
+import CssBaseline from "@mui/material/CssBaseline";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable}`}>
         <ThemeProvider>
+          <CssBaseline />
           <SiteHeader />
           <main style={{ width: "100%", margin: 0, padding: 0 }}>
             {children}
