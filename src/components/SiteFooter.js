@@ -67,12 +67,15 @@ export default function SiteFooter() {
               component="h2"
               sx={{
                 fontWeight: 700,
-                color: isDark ? "#ffffff" : "var(--color-text)",
+                background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
                 mb: 2,
                 fontSize: { xs: 20, md: 24 },
               }}
             >
-              Pharmacia
+              Company
             </Typography>
             <Typography
               variant="body2"
@@ -314,7 +317,7 @@ export default function SiteFooter() {
                   mb: 1,
                 }}
               >
-                © {currentYear} Pharmacia. All rights reserved.
+                © {currentYear} Company. All rights reserved.
               </Typography>
               <Typography
                 sx={{

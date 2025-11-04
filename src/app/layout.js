@@ -23,7 +23,7 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: "Pharmacia | Pharmaceutical E‑commerce",
+  title: "Company | Pharmaceutical E‑commerce",
   description: "Trusted online pharmacy with curated healthcare products",
 };
 

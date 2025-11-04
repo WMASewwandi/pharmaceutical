@@ -12,7 +12,7 @@ import {
   Button,
   Divider,
   Avatar,
-  Grid,
+  Chip,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
@@ -64,86 +64,151 @@ export default function AccountPage() {
       <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
         {/* Header */}
         <Box sx={{ mb: { xs: 3, md: 4 } }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              color: "var(--color-text)",
-              fontSize: { xs: 24, md: 28 },
-              mb: 1,
-            }}
-          >
-            My Account
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "var(--color-muted-text)",
-              fontSize: { xs: 13, md: 14 },
-            }}
-          >
-            Manage your account information and preferences
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <PersonIcon sx={{ fontSize: 32, color: "white" }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  color: "var(--color-text)",
+                  fontSize: { xs: 24, md: 28 },
+                  mb: 0.5,
+                }}
+              >
+                My Account
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "var(--color-muted-text)",
+                  fontSize: { xs: 13, md: 14 },
+                }}
+              >
+                Manage your account information and preferences
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 3,
+          }}
+        >
           {/* Left Column - Profile */}
-          <Grid item xs={12} md={8}>
+          <Box
+            sx={{
+              flex: { xs: "1 1 100%", md: "1 1 calc(66.666% - 12px)" },
+              minWidth: { xs: "100%", md: "calc(66.666% - 12px)" },
+            }}
+          >
             <Card
               sx={{
                 background: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
                 borderRadius: 3,
                 boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.04)",
-                mb: 3,
+                height: "100%",
               }}
             >
               <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      color: "var(--color-text)",
-                      fontSize: { xs: 16, md: 18 },
-                    }}
-                  >
-                    Profile Information
-                  </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1.5,
+                        background: "var(--color-primary)15",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <PersonIcon sx={{ fontSize: 20, color: "var(--color-primary)" }} />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: "var(--color-text)",
+                        fontSize: { xs: 16, md: 18 },
+                      }}
+                    >
+                      Profile Information
+                    </Typography>
+                  </Box>
                   {!isEditing && (
                     <Button
                       startIcon={<EditIcon />}
                       onClick={() => setIsEditing(true)}
+                      variant="outlined"
                       sx={{
+                        borderColor: "var(--color-border)",
                         color: "var(--color-primary)",
                         textTransform: "none",
                         fontSize: { xs: 13, md: 14 },
+                        fontWeight: 600,
+                        "&:hover": {
+                          borderColor: "var(--color-primary)",
+                          bgcolor: "var(--color-primary)08",
+                        },
                       }}
                     >
-                      Edit
+                      Edit Profile
                     </Button>
                   )}
                 </Box>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+                  <Box 
+                    sx={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: 3, 
+                      mb: 3,
+                      p: 3,
+                      borderRadius: 2,
+                      background: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
+                      border: "1px solid var(--color-border)",
+                    }}
+                  >
                     <Avatar
                       sx={{
-                        width: { xs: 64, md: 80 },
-                        height: { xs: 64, md: 80 },
-                        bgcolor: "var(--color-primary)",
-                        fontSize: { xs: 24, md: 32 },
+                        width: { xs: 80, md: 100 },
+                        height: { xs: 80, md: 100 },
+                        bgcolor: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+                        fontSize: { xs: 28, md: 36 },
+                        fontWeight: 700,
+                        border: "3px solid var(--color-surface)",
+                        boxShadow: isDark ? "0 4px 12px rgba(0,0,0,0.3)" : "0 4px 12px rgba(0,0,0,0.1)",
                       }}
                     >
                       {profileData.firstName[0]}{profileData.lastName[0]}
                     </Avatar>
-                    <Box>
+                    <Box sx={{ flexGrow: 1 }}>
                       <Typography
-                        variant="h6"
+                        variant="h5"
                         sx={{
-                          fontWeight: 600,
+                          fontWeight: 700,
                           color: "var(--color-text)",
-                          fontSize: { xs: 16, md: 18 },
+                          fontSize: { xs: 18, md: 22 },
+                          mb: 0.5,
                         }}
                       >
                         {profileData.firstName} {profileData.lastName}
@@ -153,10 +218,21 @@ export default function AccountPage() {
                         sx={{
                           color: "var(--color-muted-text)",
                           fontSize: { xs: 13, md: 14 },
+                          mb: 1,
                         }}
                       >
                         {profileData.email}
                       </Typography>
+                      <Chip
+                        label="Member Since 2024"
+                        size="small"
+                        sx={{
+                          bgcolor: "var(--color-primary)15",
+                          color: "var(--color-primary)",
+                          fontWeight: 600,
+                          fontSize: 11,
+                        }}
+                      />
                     </Box>
                   </Box>
 
@@ -367,7 +443,7 @@ export default function AccountPage() {
                   </Box>
 
                   {isEditing && (
-                    <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                    <Box sx={{ display: "flex", gap: 2, mt: 2, pt: 3, borderTop: "1px solid var(--color-border)" }}>
                       <Button
                         variant="contained"
                         onClick={handleSave}
@@ -376,10 +452,16 @@ export default function AccountPage() {
                           color: "white",
                           textTransform: "none",
                           fontWeight: 600,
-                          px: 3,
+                          px: 4,
+                          py: 1.25,
+                          borderRadius: 2,
+                          boxShadow: "0 4px 12px rgba(0, 119, 182, 0.3)",
                           "&:hover": {
                             bgcolor: "var(--color-secondary)",
+                            boxShadow: "0 6px 16px rgba(0, 119, 182, 0.4)",
+                            transform: "translateY(-2px)",
                           },
+                          transition: "all 250ms ease",
                         }}
                       >
                         Save Changes
@@ -392,11 +474,15 @@ export default function AccountPage() {
                           color: "var(--color-text)",
                           textTransform: "none",
                           fontWeight: 600,
-                          px: 3,
+                          px: 4,
+                          py: 1.25,
+                          borderRadius: 2,
                           "&:hover": {
                             borderColor: "var(--color-primary)",
                             color: "var(--color-primary)",
+                            bgcolor: "var(--color-primary)08",
                           },
+                          transition: "all 200ms ease",
                         }}
                       >
                         Cancel
@@ -406,30 +492,52 @@ export default function AccountPage() {
                 </Box>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
 
           {/* Right Column - Quick Actions */}
-          <Grid item xs={12} md={4}>
+          <Box
+            sx={{
+              flex: { xs: "1 1 100%", md: "1 1 calc(33.333% - 12px)" },
+              minWidth: { xs: "100%", md: "calc(33.333% - 12px)" },
+            }}
+          >
             <Card
               sx={{
                 background: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
                 borderRadius: 3,
                 boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.04)",
+                height: "100%",
+                position: { md: "sticky" },
+                top: { md: 100 },
               }}
             >
               <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: "var(--color-text)",
-                    mb: 3,
-                    fontSize: { xs: 16, md: 18 },
-                  }}
-                >
-                  Quick Actions
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1.5,
+                      background: "var(--color-primary)15",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ShoppingBagIcon sx={{ fontSize: 20, color: "var(--color-primary)" }} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: "var(--color-text)",
+                      fontSize: { xs: 16, md: 18 },
+                    }}
+                  >
+                    Quick Actions
+                  </Typography>
+                </Box>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                   {quickActions.map((action, index) => {
@@ -439,7 +547,7 @@ export default function AccountPage() {
                         key={index}
                         component={Link}
                         href={action.href}
-                        startIcon={<IconComponent sx={{ color: action.color }} />}
+                        startIcon={<IconComponent sx={{ fontSize: 20, color: action.color }} />}
                         fullWidth
                         sx={{
                           justifyContent: "flex-start",
@@ -448,13 +556,19 @@ export default function AccountPage() {
                           border: "1px solid var(--color-border)",
                           borderRadius: 2,
                           py: 1.5,
-                          px: 2,
-                          "&:hover": {
-                            borderColor: "var(--color-primary)",
-                            bgcolor: "var(--color-primary)08",
-                            color: "var(--color-primary)",
-                          },
+                          px: 2.5,
+                          fontWeight: 600,
+                          fontSize: { xs: 13, md: 14 },
                           transition: "all 200ms ease",
+                          "&:hover": {
+                            borderColor: action.color,
+                            bgcolor: `${action.color}15`,
+                            color: action.color,
+                            transform: "translateX(4px)",
+                            boxShadow: isDark 
+                              ? `0 4px 12px ${action.color}40` 
+                              : `0 4px 12px ${action.color}25`,
+                          },
                         }}
                       >
                         {action.label}
@@ -464,8 +578,8 @@ export default function AccountPage() {
                 </Box>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

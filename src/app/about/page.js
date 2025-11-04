@@ -76,7 +76,7 @@ export default function AboutUsPage() {
               lineHeight: 1.7,
             }}
           >
-            Pharmacia is your trusted online pharmacy, committed to providing genuine medicines, wellness products, and healthcare essentials delivered safely to your door.
+            Company is your trusted online pharmacy, committed to providing genuine medicines, wellness products, and healthcare essentials delivered safely to your door.
           </Typography>
         </Box>
 
@@ -225,7 +225,7 @@ export default function AboutUsPage() {
                     lineHeight: 1.8,
                   }}
                 >
-                  At Pharmacia, our mission is to make healthcare accessible, affordable, and convenient for everyone. We believe that quality healthcare shouldn't be a luxury, and we're dedicated to providing genuine pharmaceutical products at competitive prices, backed by expert advice and exceptional customer service.
+                  At Company, our mission is to make healthcare accessible, affordable, and convenient for everyone. We believe that quality healthcare shouldn't be a luxury, and we're dedicated to providing genuine pharmaceutical products at competitive prices, backed by expert advice and exceptional customer service.
                 </Typography>
               </CardContent>
             </Card>
@@ -411,7 +411,7 @@ export default function AboutUsPage() {
                   textAlign: "center",
                 }}
               >
-                Why Choose Pharmacia?
+                Why Choose Company?
               </Typography>
               <Box
                 sx={{

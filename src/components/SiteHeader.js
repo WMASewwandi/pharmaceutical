@@ -105,8 +105,30 @@ export default function SiteHeader() {
         color: shouldShowBackground ? "var(--color-text)" : "var(--color-dark-bg)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <Link href="/" style={{ fontWeight: 700, color: "inherit", fontSize: 18 }}>
-            Logo
+          <Link 
+            href="/" 
+            style={{ 
+              fontWeight: 700, 
+              fontSize: 20,
+              textDecoration: "none",
+              background: shouldShowBackground 
+                ? "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)" 
+                : "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              transition: "all 250ms ease",
+              display: "inline-block",
+              position: "relative",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "scale(1.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "scale(1)";
+            }}
+          >
+            Company
           </Link>
           {!isMobile && (
             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
