@@ -5,6 +5,8 @@ import UploadPrescription from "../components/UploadPrescription";
 import FeaturedProducts from "../components/FeaturedProducts";
 import HealthBlog from "../components/HealthBlog";
 import WhyChooseUs from "../components/WhyChooseUs";
+import Newsletter from "../components/Newsletter";
+import BrandPartners from "../components/BrandPartners";
 
 export default function Home() {
   return (
@@ -25,6 +27,8 @@ export default function Home() {
       <FeaturedProducts />
       <HealthBlog />
       <WhyChooseUs />
+      <Newsletter />
+      <BrandPartners />
     </div>
   );
 }
