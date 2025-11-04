@@ -2,6 +2,9 @@ import styles from "./page.module.css";
 import FeaturedCategories from "../components/FeaturedCategories";
 import TopOffers from "../components/TopOffers";
 import UploadPrescription from "../components/UploadPrescription";
+import FeaturedProducts from "../components/FeaturedProducts";
+import HealthBlog from "../components/HealthBlog";
+import WhyChooseUs from "../components/WhyChooseUs";
 
 export default function Home() {
   return (
@@ -19,6 +22,9 @@ export default function Home() {
       <FeaturedCategories />
       <TopOffers />
       <UploadPrescription />
+      <FeaturedProducts />
+      <HealthBlog />
+      <WhyChooseUs />
     </div>
   );
 }

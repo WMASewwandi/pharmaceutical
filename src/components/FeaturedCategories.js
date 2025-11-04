@@ -51,7 +51,7 @@ export default function FeaturedCategories() {
       sx={{
         py: { xs: 4, md: 6 },
         px: { xs: 2, md: 3 },
-        maxWidth: 1200,
+        maxWidth: "85vw",
         margin: "0 auto",
         background: "var(--color-background)",
         width: "100%",
