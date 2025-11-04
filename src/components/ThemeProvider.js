@@ -13,11 +13,11 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
-    const initial = saved === "dark" || saved === "light" ? saved : "dark"; // default dark
+    const initial = saved === "dark" || saved === "light" ? saved : "light"; // default light
     setTheme(initial);
   }, []);
 
