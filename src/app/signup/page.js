@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -24,7 +24,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useTheme } from "../../components/ThemeProvider";
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
@@ -483,6 +483,28 @@ export default function SignupPage() {
         </Card>
       </Container>
     </Box>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "var(--color-background)",
+          pt: { xs: 12, md: 14 },
+          pb: 6,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography sx={{ color: "var(--color-text)" }}>Loading...</Typography>
+      </Box>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,7 +20,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useTheme } from "../../components/ThemeProvider";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
@@ -79,7 +79,7 @@ export default function LoginPage() {
                   fontSize: { xs: 24, md: 28 },
                 }}
               >
-              Sign In
+                Sign In
               </Typography>
               <Typography
                 variant="body2"
@@ -279,6 +279,28 @@ export default function LoginPage() {
         </Card>
       </Container>
     </Box>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "var(--color-background)",
+          pt: { xs: 12, md: 14 },
+          pb: 6,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography sx={{ color: "var(--color-text)" }}>Loading...</Typography>
+      </Box>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
 
