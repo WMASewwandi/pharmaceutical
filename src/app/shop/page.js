@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Container, TextField, InputAdornment, Grid, Card, CardContent, CardMedia, Typography, Button, Chip, Select, MenuItem, FormControl, InputLabel, Modal, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Container, TextField, InputAdornment, Grid, Card, CardContent, CardMedia, Typography, Button, Chip, Select, MenuItem, FormControl, InputLabel, Modal, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { useTheme } from "../../components/ThemeProvider";
 
 // Sample products data
@@ -133,6 +135,26 @@ export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("default");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [quantities, setQuantities] = useState({});
+
+  const handleQuantityChange = (productId, change) => {
+    setQuantities((prev) => {
+      const currentQty = prev[productId] || 0;
+      const newQty = Math.max(0, currentQty + change);
+      if (newQty === 0) {
+        const { [productId]: removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [productId]: newQty };
+    });
+  };
+
+  const handleAddToBag = (productId) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1,
+    }));
+  };
 
   // Filter products based on search and category
   const filteredProducts = products.filter((product) => {
@@ -173,7 +195,7 @@ export default function ShopPage() {
         pb: 4,
       }}
     >
-      <Container maxWidth="xl">
+      <Container maxWidth="lg">
         {/* Search Bar Section */}
         <Box sx={{ mb: { xs: 3, md: 4 } }}>
           <TextField
@@ -619,33 +641,96 @@ export default function ShopPage() {
                       </Typography>
                     )}
                   </Box>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
-                    disabled={!product.inStock}
-                    onClick={() => {
-                      // TODO: Add to bag functionality
-                      console.log("Add to bag:", product.id);
-                    }}
-                    sx={{
-                      bgcolor: "var(--color-primary)",
-                      color: "white",
-                      textTransform: "none",
-                      fontWeight: 600,
-                      fontSize: { xs: 12, md: 13 },
-                      py: { xs: 0.75, md: 1 },
-                      "&:hover": {
-                        bgcolor: "var(--color-secondary)",
-                      },
-                      "&:disabled": {
-                        bgcolor: "var(--color-border)",
-                        color: "var(--color-muted-text)",
-                      },
-                    }}
-                  >
-                    {product.inStock ? "Add to Bag" : "Out of Stock"}
-                  </Button>
+                  {quantities[product.id] && quantities[product.id] > 0 ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        border: "1px solid var(--color-border)",
+                        borderRadius: 2,
+                        py: { xs: 0.75, md: 1 },
+                        px: 1,
+                        background: "var(--color-surface)",
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(product.id, -1)}
+                        disabled={quantities[product.id] <= 1}
+                        sx={{
+                          color: "var(--color-text)",
+                          width: { xs: 32, md: 36 },
+                          height: { xs: 32, md: 36 },
+                          "&:hover": {
+                            bgcolor: "var(--color-primary)15",
+                            color: "var(--color-primary)",
+                          },
+                          "&:disabled": {
+                            opacity: 0.4,
+                          },
+                        }}
+                      >
+                        <RemoveIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                      </IconButton>
+                      <Typography
+                        sx={{
+                          minWidth: { xs: 32, md: 40 },
+                          textAlign: "center",
+                          fontSize: { xs: 14, md: 15 },
+                          fontWeight: 600,
+                          color: "var(--color-text)",
+                        }}
+                      >
+                        {quantities[product.id]}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(product.id, 1)}
+                        disabled={!product.inStock}
+                        sx={{
+                          color: "var(--color-text)",
+                          width: { xs: 32, md: 36 },
+                          height: { xs: 32, md: 36 },
+                          "&:hover": {
+                            bgcolor: "var(--color-primary)15",
+                            color: "var(--color-primary)",
+                          },
+                          "&:disabled": {
+                            opacity: 0.4,
+                          },
+                        }}
+                      >
+                        <AddIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
+                      disabled={!product.inStock}
+                      onClick={() => handleAddToBag(product.id)}
+                      sx={{
+                        bgcolor: "var(--color-primary)",
+                        color: "white",
+                        textTransform: "none",
+                        fontWeight: 600,
+                        fontSize: { xs: 12, md: 13 },
+                        py: { xs: 0.75, md: 1 },
+                        "&:hover": {
+                          bgcolor: "var(--color-secondary)",
+                        },
+                        "&:disabled": {
+                          bgcolor: "var(--color-border)",
+                          color: "var(--color-muted-text)",
+                        },
+                      }}
+                    >
+                      {product.inStock ? "Add to Bag" : "Out of Stock"}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </Grid>

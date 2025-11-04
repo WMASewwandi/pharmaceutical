@@ -50,9 +50,11 @@ export default function SiteFooter() {
   return (
     <footer
       style={{
-        borderTop: "1px solid var(--color-border)",
-        background: "var(--color-surface)",
-        color: "var(--color-text)",
+        borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid var(--color-border)",
+        background: isDark 
+          ? "linear-gradient(180deg, #0a1625 0%, #0d1a2a 100%)" 
+          : "linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)",
+        color: isDark ? "#e6edf6" : "var(--color-text)",
         marginTop: "auto",
       }}
     >
@@ -65,7 +67,7 @@ export default function SiteFooter() {
               component="h2"
               sx={{
                 fontWeight: 700,
-                color: "var(--color-text)",
+                color: isDark ? "#ffffff" : "var(--color-text)",
                 mb: 2,
                 fontSize: { xs: 20, md: 24 },
               }}
@@ -75,7 +77,7 @@ export default function SiteFooter() {
             <Typography
               variant="body2"
               sx={{
-                color: "var(--color-muted-text)",
+                color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                 mb: 2,
                 lineHeight: 1.7,
                 fontSize: { xs: 13, md: 14 },
@@ -101,8 +103,8 @@ export default function SiteFooter() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      border: "1px solid var(--color-border)",
-                      color: "var(--color-text)",
+                      border: isDark ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid var(--color-border)",
+                      color: isDark ? "#b6c2d6" : "var(--color-text)",
                       transition: "all 250ms ease",
                       "&:hover": {
                         background: "var(--color-primary)",
@@ -126,7 +128,7 @@ export default function SiteFooter() {
               component="h3"
               sx={{
                 fontWeight: 600,
-                color: "var(--color-text)",
+                color: isDark ? "#ffffff" : "var(--color-text)",
                 mb: 2,
                 fontSize: { xs: 14, md: 16 },
               }}
@@ -141,9 +143,11 @@ export default function SiteFooter() {
                   className="navLink"
                   style={{
                     fontSize: "13px",
-                    color: "var(--color-muted-text)",
+                    color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                     transition: "color 200ms ease",
                   }}
+                  onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                  onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
                 >
                   {link.label}
                 </Link>
@@ -158,7 +162,7 @@ export default function SiteFooter() {
               component="h3"
               sx={{
                 fontWeight: 600,
-                color: "var(--color-text)",
+                color: isDark ? "#ffffff" : "var(--color-text)",
                 mb: 2,
                 fontSize: { xs: 14, md: 16 },
               }}
@@ -173,9 +177,11 @@ export default function SiteFooter() {
                   className="navLink"
                   style={{
                     fontSize: "13px",
-                    color: "var(--color-muted-text)",
+                    color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                     transition: "color 200ms ease",
                   }}
+                  onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                  onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
                 >
                   {link.label}
                 </Link>
@@ -190,7 +196,7 @@ export default function SiteFooter() {
               component="h3"
               sx={{
                 fontWeight: 600,
-                color: "var(--color-text)",
+                color: isDark ? "#ffffff" : "var(--color-text)",
                 mb: 2,
                 fontSize: { xs: 14, md: 16 },
               }}
@@ -205,9 +211,11 @@ export default function SiteFooter() {
                   className="navLink"
                   style={{
                     fontSize: "13px",
-                    color: "var(--color-muted-text)",
+                    color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                     transition: "color 200ms ease",
                   }}
+                  onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                  onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
                 >
                   {link.label}
                 </Link>
@@ -222,7 +230,7 @@ export default function SiteFooter() {
               component="h3"
               sx={{
                 fontWeight: 600,
-                color: "var(--color-text)",
+                color: isDark ? "#ffffff" : "var(--color-text)",
                 mb: 2,
                 fontSize: { xs: 14, md: 16 },
               }}
@@ -236,7 +244,7 @@ export default function SiteFooter() {
                   <Typography
                     sx={{
                       fontSize: "13px",
-                      color: "var(--color-muted-text)",
+                      color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                       lineHeight: 1.5,
                     }}
                   >
@@ -252,7 +260,7 @@ export default function SiteFooter() {
                   <Typography
                     sx={{
                       fontSize: "13px",
-                      color: "var(--color-muted-text)",
+                      color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                       lineHeight: 1.5,
                     }}
                   >
@@ -268,7 +276,7 @@ export default function SiteFooter() {
                   <Typography
                     sx={{
                       fontSize: "13px",
-                      color: "var(--color-muted-text)",
+                      color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                       lineHeight: 1.5,
                     }}
                   >
@@ -286,7 +294,7 @@ export default function SiteFooter() {
           sx={{
             mt: { xs: 4, md: 5 },
             pt: { xs: 3, md: 4 },
-            borderTop: "1px solid var(--color-border)",
+            borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid var(--color-border)",
           }}
         >
           <Box
@@ -302,7 +310,7 @@ export default function SiteFooter() {
               <Typography
                 sx={{
                   fontSize: "12px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                   mb: 1,
                 }}
               >
@@ -311,7 +319,7 @@ export default function SiteFooter() {
               <Typography
                 sx={{
                   fontSize: "12px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                   fontWeight: 600,
                   mb: 0.5,
                 }}
@@ -321,7 +329,7 @@ export default function SiteFooter() {
               <Typography
                 sx={{
                   fontSize: "11px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#94a3b8" : "var(--color-muted-text)",
                   lineHeight: 1.6,
                 }}
               >
@@ -335,9 +343,12 @@ export default function SiteFooter() {
                 href="/privacy-policy"
                 style={{
                   fontSize: "12px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                   textDecoration: "none",
+                  transition: "color 200ms ease",
                 }}
+                onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
               >
                 Privacy Policy
               </Link>
@@ -345,9 +356,12 @@ export default function SiteFooter() {
                 href="/terms-conditions"
                 style={{
                   fontSize: "12px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                   textDecoration: "none",
+                  transition: "color 200ms ease",
                 }}
+                onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
               >
                 Terms & Conditions
               </Link>
@@ -355,9 +369,12 @@ export default function SiteFooter() {
                 href="/license"
                 style={{
                   fontSize: "12px",
-                  color: "var(--color-muted-text)",
+                  color: isDark ? "#b6c2d6" : "var(--color-muted-text)",
                   textDecoration: "none",
+                  transition: "color 200ms ease",
                 }}
+                onMouseEnter={(e) => e.target.style.color = isDark ? "#ffffff" : "var(--color-primary)"}
+                onMouseLeave={(e) => e.target.style.color = isDark ? "#b6c2d6" : "var(--color-muted-text)"}
               >
                 View License
               </Link>

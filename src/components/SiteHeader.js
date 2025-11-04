@@ -21,6 +21,9 @@ export default function SiteHeader() {
   const helpline = "+94 11 234 5678";
   const email = "help@pharmacia.com";
   const { theme, toggleTheme } = useTheme();
+  
+  const isHomePage = pathname === "/";
+  const shouldShowBackground = scrolled || !isHomePage;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -51,10 +54,10 @@ export default function SiteHeader() {
       left: 0,
       right: 0,
       zIndex: 50,
-      background: scrolled ? "var(--color-background)" : "transparent",
-      borderBottom: scrolled ? "1px solid var(--color-border)" : "transparent",
-      boxShadow: scrolled ? "var(--shadow-sm)" : "none",
-      backdropFilter: scrolled ? "saturate(180%) blur(6px)" : "none",
+      background: shouldShowBackground ? "var(--color-background)" : "transparent",
+      borderBottom: shouldShowBackground ? "1px solid var(--color-border)" : "transparent",
+      boxShadow: shouldShowBackground ? "var(--shadow-sm)" : "none",
+      backdropFilter: shouldShowBackground ? "saturate(180%) blur(6px)" : "none",
       transition: "background 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
     }}>
       {/* Top helpline bar */}
@@ -99,7 +102,7 @@ export default function SiteHeader() {
         alignItems: "center",
         justifyContent: "space-between",
         gap: 16,
-        color: scrolled ? "var(--color-text)" : "var(--color-dark-bg)",
+        color: shouldShowBackground ? "var(--color-text)" : "var(--color-dark-bg)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           <Link href="/" style={{ fontWeight: 700, color: "inherit", fontSize: 18 }}>
