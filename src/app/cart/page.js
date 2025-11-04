@@ -615,6 +615,8 @@ export default function CartPage() {
 
                   {/* Checkout Button */}
                   <Button
+                    component={Link}
+                    href="/login?redirect=/checkout"
                     variant="contained"
                     fullWidth
                     sx={{
