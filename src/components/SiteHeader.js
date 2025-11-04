@@ -39,7 +39,6 @@ export default function SiteHeader() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
-    { href: "/categories", label: "Categories" },
     { href: "/wellness", label: "Health & Wellness" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },

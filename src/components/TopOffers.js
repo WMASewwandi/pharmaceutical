@@ -352,7 +352,7 @@ export default function TopOffers() {
                       fullWidth
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Add to cart functionality
+                        // TODO: Add to bag functionality
                         console.log("Add to bag:", offer.id);
                       }}
                       sx={{

@@ -260,8 +260,8 @@ export default function FeaturedProducts() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // TODO: Add to cart functionality
-                    console.log("Add to cart:", product.id);
+                    // TODO: Add to bag functionality
+                    console.log("Add to bag:", product.id);
                   }}
                   sx={{
                     bgcolor: "var(--color-primary)",

@@ -625,8 +625,8 @@ export default function ShopPage() {
                     startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
                     disabled={!product.inStock}
                     onClick={() => {
-                      // TODO: Add to cart functionality
-                      console.log("Add to cart:", product.id);
+                      // TODO: Add to bag functionality
+                      console.log("Add to bag:", product.id);
                     }}
                     sx={{
                       bgcolor: "var(--color-primary)",
@@ -644,7 +644,7 @@ export default function ShopPage() {
                       },
                     }}
                   >
-                    {product.inStock ? "Add to Cart" : "Out of Stock"}
+                    {product.inStock ? "Add to Bag" : "Out of Stock"}
                   </Button>
                 </CardContent>
               </Card>
