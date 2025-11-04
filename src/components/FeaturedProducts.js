@@ -45,15 +45,6 @@ const products = [
     image: "/images/no-image.jpg",
     href: "/shop/cetirizine-10mg",
   },
-  {
-    id: 5,
-    name: "Cetirizine 10mg",
-    dosage: "Tablets - 10's",
-    price: 180,
-    rating: 4.6,
-    image: "/images/no-image.jpg",
-    href: "/shop/cetirizine-10mg",
-  },
 ];
 
 export default function FeaturedProducts() {
