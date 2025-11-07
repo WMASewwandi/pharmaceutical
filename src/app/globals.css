@@ -9,6 +9,7 @@
   --color-border: #E2E8F0; /* Slate 200 */
   --color-surface: #FFFFFF;
   --color-background: #F8FAFC; /* Near-White */
+  --header-offset: 120px;
 
   /* Semantics */
   --background: var(--color-background);
@@ -46,6 +47,15 @@ body {
   font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+main {
+  width: 100%;
+  margin: 0;
+}
+
+.with-header-offset {
+  padding-top: var(--header-offset);
 }
 
 * {

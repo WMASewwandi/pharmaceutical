@@ -5,23 +5,20 @@ import ThemeToggle from "./ThemeToggle";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import PhoneEnabledIcon from "@mui/icons-material/PhoneEnabled";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import { Button, IconButton, Box } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import { Button, IconButton, Box, Typography } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTheme } from "./ThemeProvider";
 
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
-  const cartCount = 0; // TODO: wire to store
-  const helpline = "+94 11 234 5678";
-  const email = "help@pharmacia.com";
-  const { theme, toggleTheme } = useTheme();
-  
+  const cartCount = 0;
+  const helpline = "(+94) 077 377 1726";
   const isHomePage = pathname === "/";
   const shouldShowBackground = scrolled || !isHomePage;
 
@@ -39,12 +36,15 @@ export default function SiteHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const links = [
+  const navLinks = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
-    { href: "/wellness", label: "Health & Wellness" },
     { href: "/about", label: "About Us" },
-    { href: "/contact", label: "Contact" },
+    { href: "/contact", label: "Contact Us" },
+  ];
+
+  const ctaLinks = [
+    { href: "/orders-tracking", label: "Orders Tracking" },
   ];
 
   return (
@@ -54,228 +54,322 @@ export default function SiteHeader() {
       left: 0,
       right: 0,
       zIndex: 50,
-      background: shouldShowBackground ? "var(--color-background)" : "transparent",
-      borderBottom: shouldShowBackground ? "1px solid var(--color-border)" : "transparent",
+      background: "var(--color-background)",
+      borderBottom: "1px solid var(--color-border)",
       boxShadow: shouldShowBackground ? "var(--shadow-sm)" : "none",
       backdropFilter: shouldShowBackground ? "saturate(180%) blur(6px)" : "none",
       transition: "background 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
     }}>
-      {/* Top helpline bar */}
-      <div style={{
+      {/* Top helpline & social bar */}
+      <Box
+        sx={{
         background: "var(--color-surface)",
-        color: "var(--color-text)",
+          color: "var(--color-text-muted, var(--color-text))",
         borderBottom: "1px solid var(--color-border)",
         fontSize: 12,
-        lineHeight: "24px",
-      }}>
-        <div style={{
-          maxWidth: '100vw',
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: '85vw',
           margin: "0 auto",
-          padding: "2px 20px",
+            px: { xs: 2, md: 4 },
+            py: 0.5,
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-end",
-          gap: 16,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <a href={`tel:${helpline.replace(/\s+/g, "")}`} style={{ color: "inherit" }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <PhoneEnabledIcon style={{ fontSize: 14 }} /> {helpline} 
-              </span>
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
+            <PhoneEnabledIcon sx={{ fontSize: 16 }} />
+            <a
+              href={`tel:${helpline.replace(/[^+\d]/g, "")}`}
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              Customer care {helpline}
             </a>
-            {!isMobile && (
-              <a href={`mailto:${email}`} style={{ color: "inherit" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <EmailOutlinedIcon style={{ fontSize: 14 }} /> {email}
-                </span>
-              </a>
-            )}
-          </div>
-          {/* aligned to right */}
-        </div>
-      </div>
-      <div style={{
-        maxWidth: '100vw',
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Main header */}
+      <Box
+        sx={{
+          background: "var(--color-background)",
+          color: "var(--color-text)",
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: '85vw',
         margin: "0 auto",
-        padding: "10px 20px",
+            px: { xs: 2, md: 4 },
+            py: { xs: 2, md: 3 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 16,
-        color: shouldShowBackground ? "var(--color-text)" : "var(--color-dark-bg)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            flexWrap: "wrap",
+            gap: { xs: 2, md: 4 },
+          }}
+        >
           <Link 
             href="/" 
-            style={{ 
-              fontWeight: 700, 
-              fontSize: 20,
-              textDecoration: "none",
-              background: shouldShowBackground 
-                ? "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)" 
-                : "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              transition: "all 250ms ease",
-              display: "inline-block",
-              position: "relative",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "scale(1.05)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "scale(1)";
+            style={{ textDecoration: "none", color: "inherit", flexShrink: 0 }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box
+                component="img"
+                src="/images/logo.png"
+                alt="Opus Marketplace logo"
+                sx={{
+                  width: 80,
+                  height: 80,
+                  objectFit: "contain",
+                  flexShrink: 0,
+                }}
+              />
+              <Box sx={{ lineHeight: 1.1 }}>
+                <Typography component="span" sx={{ fontWeight: 700, fontSize: 20 }}>
+                  Opus Marketplace
+                </Typography>
+                <Typography component="span" sx={{ display: "block", fontSize: 13, color: "var(--color-text-muted, #725f3a)" }}>
+                  Lifestyle & tech essentials online
+                </Typography>
+                <Typography component="span" sx={{ display: "block", fontSize: 11, color: "var(--color-text-muted, #8f8f8f)", mt: 0.5 }}>
+                  Since 2025
+                </Typography>
+              </Box>
+            </Box>
+          </Link>
+
+          <Box
+                    sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              order: { xs: 2, md: 2 },
             }}
           >
-            Company
-          </Link>
-          {!isMobile && (
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {links.map((l) => {
-                const isActive = pathname === l.href;
-                return (
-                  <Button
-                    key={l.href}
-                    component={Link}
-                    href={l.href}
-                    disableRipple
-                    sx={{
-                      color: "inherit",
-                      textTransform: "none",
-                      px: 1,
-                      py: 1,
-                      position: "relative",
-                      '&::before': {
-                        content: '""',
-                        position: "absolute",
-                        inset: "-2px -8px",
-                        borderRadius: "10px",
-                        background: "var(--color-accent)",
-                        opacity: isActive ? 0.2 : 0,
-                        transform: isActive ? 'translateY(0) scale(1)' : 'translateY(4px) scale(0.96)',
-                        transition: "opacity 160ms ease, transform 200ms ease",
-                        zIndex: -1,
-                      },
-                      '&:hover': {
-                        color: "var(--color-primary)",
-                        transform: "translateY(-1px)",
-                        '&::before': { opacity: 0.16, transform: 'translateY(0) scale(1)' },
-                      },
-                    }}
-                  >
-                    {l.label}
-                  </Button>
-                );
-              })}
-            </Box>
-          )}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          
-          {isMobile && (
+            {!isMobile && <ThemeToggle />}
+
             <IconButton
-              href="/cart"
               component={Link}
-              aria-label="Cart"
-              sx={{ border: "1px solid var(--color-border)", color: "inherit", width: 36, height: 36 }}
-              size="small"
-            >
-              <Badge badgeContent={cartCount} color="primary" showZero>
-                <ShoppingBagIcon fontSize="small" />
-              </Badge>
-            </IconButton>
-          )}
-          {/* mobile menu icon should be last; add theme toggle before it */}
-          {isMobile && (
-            <div style={{ width: 36, height: 36 }}>
-              <ThemeToggle />
-            </div>
-          )}
-          {isMobile && (
-            <IconButton
-              aria-label="Open menu"
-              onClick={() => setMenuOpen((v) => !v)}
-              sx={{
-                border: "1px solid var(--color-border)",
-                color: "inherit",
-                width: 36,
-                height: 36,
-              }}
-              size="small"
-            >
-              ☰
-            </IconButton>
-          )}
-          {!isMobile && (
-            <IconButton
-              href="/cart"
-              component={Link}
-              aria-label="Cart"
-              sx={{ border: "1px solid var(--color-border)", color: "inherit", width: 36, height: 36 }}
-              size="small"
-            >
-              <Badge badgeContent={cartCount} color="primary" showZero>
-                <ShoppingBagIcon fontSize="small" />
-              </Badge>
-            </IconButton>
-          )}
-          {/* Theme toggle only on desktop in the nav bar */}
-          {!isMobile && <ThemeToggle />}
-          {!isMobile && (
-            <IconButton
               href="/account"
-              component={Link}
               aria-label="Account"
-              className="userIcon"
               sx={{
                 border: "1px solid var(--color-border)",
                 color: "inherit",
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
               }}
               size="small"
             >
               <AccountCircleIcon fontSize="small" />
             </IconButton>
+
+            <IconButton
+              component={Link}
+              href="/cart"
+              aria-label="Cart"
+              sx={{
+                border: "1px solid var(--color-border)",
+                color: "inherit",
+                width: 38,
+                height: 38,
+              }}
+              size="small"
+            >
+              <Badge badgeContent={cartCount} color="primary" showZero>
+                <ShoppingBagIcon fontSize="small" />
+              </Badge>
+            </IconButton>
+
+            {isMobile && (
+            <IconButton
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                onClick={() => setMenuOpen((v) => !v)}
+              sx={{
+                border: "1px solid var(--color-border)",
+                color: "inherit",
+                  width: 38,
+                  height: 38,
+              }}
+              size="small"
+            >
+                {menuOpen ? <CloseIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
+            </IconButton>
           )}
-        </div>
-      </div>
-      {isMobile && menuOpen && (
-        <div style={{
-          position: "absolute",
-          top: "100%",
-          left: 20,
-          right: 20,
-          marginTop: 8,
-          background: "var(--color-background)",
-          border: "1px solid var(--color-border)",
-          borderRadius: 12,
-          overflow: "hidden",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-          zIndex: 60,
-          color: "var(--color-text)",
-        }}>
-          <nav style={{ display: "flex", flexDirection: "column", gap: 4, padding: 12 }}>
-            {[...links,
-              { href: "/login", label: "Login / Register" },
-              { href: "/cart", label: "Cart" },
-              { href: "/account", label: "Account" },
-            ].map((l) => {
-              const isActive = pathname === l.href;
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Navigation row */}
+      <Box
+        sx={{
+          background: "var(--color-surface)",
+          borderTop: "1px solid var(--color-border)",
+          borderBottom: "1px solid var(--color-border)",
+          display: isMobile ? "none" : "block",
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: '85vw',
+            margin: "0 auto",
+            px: { xs: 2, md: 4 },
+            py: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 3,
+          }}
+        >
+          <Box component="nav" sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {navLinks.map((link) => {
+              const isActive = pathname === (link.match ?? link.href);
               return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`navLink ${isActive ? "navLinkActive" : ""}`}
+                <Button
+                  key={link.href}
+                  component={Link}
+                  href={link.href}
+                  disableRipple
+                  sx={{
+                    position: "relative",
+                    color: isActive ? "var(--color-primary)" : "inherit",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: 15,
+                    px: 1,
+                    '&::after': {
+                      content: '""',
+                      position: "absolute",
+                      left: 8,
+                      right: 8,
+                      bottom: 4,
+                      height: 2,
+                      borderRadius: 999,
+                      background: "var(--color-primary)",
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? "scaleX(1)" : "scaleX(0.5)",
+                      transition: "opacity 200ms ease, transform 200ms ease",
+                    },
+                    '&:hover': {
+                      color: "var(--color-primary)",
+                      '&::after': { opacity: 1, transform: "scaleX(1)" },
+                    },
+                  }}
                 >
-                  {l.label}
-                </Link>
+                  {link.label}
+                </Button>
               );
             })}
-          </nav>
-        </div>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            {ctaLinks.map((cta) => (
+              <Button
+                key={cta.href}
+                component={Link}
+                href={cta.href}
+                sx={{
+                  background: "var(--color-primary)",
+                  color: "var(--color-primary-contrast)",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2.5,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: "0 10px 20px rgba(0, 119, 182, 0.24)",
+                  border: "1px solid transparent",
+                  '&:hover': {
+                    background: "var(--color-secondary)",
+                    boxShadow: "0 12px 24px rgba(0, 180, 216, 0.28)",
+                  },
+                }}
+              >
+                {cta.label}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+
+      {isMobile && menuOpen && (
+        <Box
+          sx={{
+          position: "absolute",
+          top: "100%",
+            left: 0,
+            right: 0,
+          background: "var(--color-background)",
+            borderTop: "1px solid var(--color-border)",
+            boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
+          zIndex: 60,
+          }}
+        >
+          <Box
+            sx={{
+              px: 2,
+              py: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            {navLinks.map((link) => {
+              const isActive = pathname === (link.match ?? link.href);
+              return (
+                <Button
+                  key={link.href}
+                  component={Link}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  sx={{
+                    justifyContent: "flex-start",
+                    color: isActive ? "var(--color-primary)" : "inherit",
+                    textTransform: "none",
+                    fontSize: 16,
+                    py: 1.25,
+                  }}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 2 }}>
+              {ctaLinks.map((cta) => (
+                <Button
+                  key={cta.href}
+                  component={Link}
+                  href={cta.href}
+                  onClick={() => setMenuOpen(false)}
+                  sx={{
+                    background: "var(--color-primary)",
+                    color: "var(--color-primary-contrast)",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: 1.5,
+                    py: 1.25,
+                    boxShadow: "0 10px 20px rgba(0, 119, 182, 0.24)",
+                    border: "1px solid transparent",
+                    '&:hover': {
+                      background: "var(--color-secondary)",
+                    },
+                  }}
+                >
+                  {cta.label}
+                </Button>
+              ))}
+            </Box>
+
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+              <ThemeToggle />
+            </Box>
+          </Box>
+        </Box>
       )}
     </header>
   );

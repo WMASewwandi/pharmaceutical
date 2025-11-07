@@ -12,13 +12,19 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
-        <img src="/images/home2.png" alt="Pharmacy hero" className={styles.heroImg} />
+        <img
+          src="https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&fit=crop"
+          alt="Person shopping online using laptop and credit card"
+          className={styles.heroImg}
+        />
         <div className={styles.heroContent}>
-          <h1>Your trusted online pharmacy</h1>
+          <h1>Everything you love, delivered fast</h1>
           <p>
-            Shop genuine medicines, wellness, and healthcare essentials delivered to your door.
+            Discover curated tech, fashion, wellness, and home picks from brands you trust.
           </p>
-          
+          <div className={styles.heroActions}>
+            <a href="/shop" className="cta-button">Start shopping</a>
+          </div>
         </div>
       </section>
       <FeaturedCategories />
