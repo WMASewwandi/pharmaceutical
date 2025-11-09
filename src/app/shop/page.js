@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Container,
@@ -30,8 +30,6 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
@@ -39,191 +37,37 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTheme } from "../../components/ThemeProvider";
+import { fetchCategoriesWithCounts } from "@/lib/api/categories";
+import { apiUrl } from "@/lib/apiConfig";
 
-// Sample products data
-const products = [
-  {
-    id: 1,
-    name: "Aurora Wireless Earbuds",
-    description: "Active noise cancelling earbuds with 24h playtime",
-    price: 14990,
-    originalPrice: 19990,
-    rating: 4.6,
-    category: "Tech",
-    subcategory: "Audio",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 2,
-    name: "Pulse Pro Smartwatch",
-    description: "Fitness tracking with AMOLED display and GPS",
-    price: 23990,
-    originalPrice: 26990,
-    rating: 4.8,
-    category: "Tech",
-    subcategory: "Wearables",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 3,
-    name: "Nimbus Laptop Sleeve",
-    description: "Water-resistant sleeve for 13\" laptops",
-    price: 4990,
-    originalPrice: 6490,
-    rating: 4.4,
-    category: "Tech",
-    subcategory: "Accessories",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 4,
-    name: "BrewPro Coffee Grinder",
-    description: "Stainless steel burr grinder with 15 settings",
-    price: 8990,
-    originalPrice: 10990,
-    rating: 4.7,
-    category: "Home",
-    subcategory: "Kitchen",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 5,
-    name: "Glow Smart Lamp",
-    description: "Voice-controlled ambient lighting with scenes",
-    price: 5990,
-    originalPrice: 7490,
-    rating: 4.5,
-    category: "Home",
-    subcategory: "Smart Home",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 6,
-    name: "Harmony Yoga Mat",
-    description: "Non-slip mat with alignment guide for daily flow",
-    price: 3990,
-    originalPrice: 4590,
-    rating: 4.6,
-    category: "Wellness",
-    subcategory: "Fitness",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 7,
-    name: "Vitality Multivitamins",
-    description: "Daily multivitamin with added adaptogens",
-    price: 2590,
-    originalPrice: 2990,
-    rating: 4.4,
-    category: "Wellness",
-    subcategory: "Supplements",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 8,
-    name: "Serene Spa Gift Set",
-    description: "Aromatherapy oils, diffuser and soy candles",
-    price: 6990,
-    originalPrice: 7990,
-    rating: 4.3,
-    category: "Wellness",
-    subcategory: "Personal Care",
-    image: "/images/no-image.jpg",
-    inStock: false,
-  },
-  {
-    id: 9,
-    name: "Vista Denim Jacket",
-    description: "Classic fit denim jacket with stretch comfort",
-    price: 10990,
-    originalPrice: 12990,
-    rating: 4.5,
-    category: "Fashion",
-    subcategory: "Men",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 10,
-    name: "Luxe Leather Tote",
-    description: "Full-grain leather tote with padded laptop sleeve",
-    price: 15990,
-    originalPrice: 18990,
-    rating: 4.7,
-    category: "Fashion",
-    subcategory: "Women",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 11,
-    name: "Spectrum Polarized Sunglasses",
-    description: "UV400 protection with scratch-resistant lenses",
-    price: 7990,
-    originalPrice: 8990,
-    rating: 4.2,
-    category: "Fashion",
-    subcategory: "Accessories",
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-];
+const PAGE_SIZE = 9;
+const DEFAULT_CATEGORY_IDS = [];
+const DEFAULT_SUBCATEGORY_KEYS = [];
+const DEFAULT_SORT_TYPE = 1;
+const PRODUCTS_ENDPOINT = apiUrl("Items/GetAllItemsForWeb");
 
-const categoryGroups = [
-  { name: "All", label: "All Products", subcategories: [] },
-  {
-    name: "Tech",
-    label: "Tech Gadgets",
-    subcategories: ["Audio", "Wearables", "Computing", "Accessories"],
-  },
-  {
-    name: "Home",
-    label: "Home & Living",
-    subcategories: ["Kitchen", "Decor", "Smart Home"],
-  },
-  {
-    name: "Wellness",
-    label: "Health & Wellness",
-    subcategories: ["Supplements", "Fitness", "Personal Care"],
-  },
-  {
-    name: "Fashion",
-    label: "Fashion",
-    subcategories: ["Women", "Men", "Accessories"],
-  },
-];
+const makeSubKey = (categoryId, subcategoryId) => `${categoryId}::${subcategoryId}`;
 
 export default function ShopPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedSubcategories, setSelectedSubcategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(DEFAULT_CATEGORY_IDS);
+  const [selectedSubcategories, setSelectedSubcategories] = useState(DEFAULT_SUBCATEGORY_KEYS);
   const [expandedSections, setExpandedSections] = useState([]);
-  const [sortBy, setSortBy] = useState("default");
+  const [sortBy, setSortBy] = useState(DEFAULT_SORT_TYPE);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [quantities, setQuantities] = useState({});
   const CONTROL_HEIGHT = 48;
-
-  const makeSubKey = (categoryName, subcategoryName) => `${categoryName}::${subcategoryName}`;
-
-  const categoryCounts = products.reduce((acc, product) => {
-    acc[product.category] = (acc[product.category] || 0) + 1;
-    return acc;
-  }, {});
-
-  const subcategoryCounts = products.reduce((acc, product) => {
-    const key = makeSubKey(product.category, product.subcategory);
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
+  const [apiCategories, setApiCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [categoryError, setCategoryError] = useState(null);
+  const [productItems, setProductItems] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [productError, setProductError] = useState(null);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleSectionExpansion = (categoryName) => {
     setExpandedSections((prev) =>
@@ -233,54 +77,76 @@ export default function ShopPage() {
     );
   };
 
-  const toggleCategorySelection = (categoryName) => {
+  const toggleCategorySelection = (categoryId) => {
+    const id = String(categoryId);
     setSelectedCategories((prev) => {
-      if (prev.includes(categoryName)) {
+      if (prev.includes(id)) {
         setSelectedSubcategories((subs) =>
-          subs.filter((key) => !key.startsWith(`${categoryName}::`))
+          subs.filter((key) => !key.startsWith(`${id}::`))
         );
-        return prev.filter((name) => name !== categoryName);
+        return prev.filter((name) => name !== id);
       }
-      setExpandedSections((prev) =>
-        prev.includes(categoryName) ? prev : [...prev, categoryName]
+      setExpandedSections((prevExpanded) =>
+        prevExpanded.includes(id) ? prevExpanded : [...prevExpanded, id]
       );
-      return [...prev, categoryName];
+      return [...prev, id];
     });
+    setCurrentPage(1);
   };
 
-  const toggleSubcategorySelection = (categoryName, subcategoryName) => {
-    const key = makeSubKey(categoryName, subcategoryName);
+  const toggleSubcategorySelection = (categoryId, subcategoryId) => {
+    const categoryKey = String(categoryId);
+    const subKeyPart = String(subcategoryId);
+    const key = makeSubKey(categoryKey, subKeyPart);
     setSelectedSubcategories((prev) => {
       if (prev.includes(key)) {
         return prev.filter((item) => item !== key);
       }
       setSelectedCategories((cats) =>
-        cats.includes(categoryName) ? cats : [...cats, categoryName]
+        cats.includes(categoryKey) ? cats : [...cats, categoryKey]
       );
       setExpandedSections((prev) =>
-        prev.includes(categoryName) ? prev : [...prev, categoryName]
+        prev.includes(categoryKey) ? prev : [...prev, categoryKey]
       );
       return [...prev, key];
     });
+    setCurrentPage(1);
   };
 
-  const clearCategorySelection = (categoryName) => {
-    setSelectedCategories((prev) => prev.filter((name) => name !== categoryName));
+  const clearCategorySelection = (categoryId) => {
+    const id = String(categoryId);
+    setSelectedCategories((prev) => prev.filter((name) => name !== id));
     setSelectedSubcategories((subs) =>
-      subs.filter((key) => !key.startsWith(`${categoryName}::`))
+      subs.filter((key) => !key.startsWith(`${id}::`))
     );
+    setCurrentPage(1);
   };
 
-  const clearSubcategorySelection = (categoryName, subcategoryName) => {
-    const key = makeSubKey(categoryName, subcategoryName);
+  const clearSubcategorySelection = (categoryId, subcategoryId) => {
+    const key = makeSubKey(String(categoryId), String(subcategoryId));
     setSelectedSubcategories((prev) => prev.filter((item) => item !== key));
+    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
     setSelectedCategories([]);
     setSelectedSubcategories([]);
     setExpandedSections([]);
-    setCurrentPage(1); // Reset page to 1 when filters are cleared
+    setSearchQuery("");
+    setSortBy(DEFAULT_SORT_TYPE);
+    setDebouncedSearch("");
+    setCurrentPage(1);
+  };
+
+  const handleSearchInputChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (value) => {
+    const numericValue = Number(value);
+    setSortBy(Number.isNaN(numericValue) ? DEFAULT_SORT_TYPE : numericValue);
+    setCurrentPage(1);
   };
 
   const handleQuantityChange = (productId, change) => {
@@ -302,38 +168,147 @@ export default function ShopPage() {
     }));
   };
 
-  // Filter products based on search and category
-  const filteredProducts = products.filter((product) => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    const matchesSearch =
-      product.name.toLowerCase().includes(normalizedQuery) ||
-      product.category.toLowerCase().includes(normalizedQuery) ||
-      product.subcategory.toLowerCase().includes(normalizedQuery) ||
-      product.description.toLowerCase().includes(normalizedQuery);
-    const matchesCategory =
-      selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    const matchesSubcategory =
-      selectedSubcategories.length === 0 ||
-      selectedSubcategories.includes(makeSubKey(product.category, product.subcategory));
-    return matchesSearch && matchesCategory && matchesSubcategory;
-  });
+  useEffect(() => {
+    const controller = new AbortController();
+    setIsLoadingCategories(true);
+    setCategoryError(null);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_XL = 9;
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_XL));
-  const visibleProducts = filteredProducts.slice(
-    (currentPage - 1) * ITEMS_XL,
-    currentPage * ITEMS_XL
-  );
+    fetchCategoriesWithCounts(controller.signal)
+      .then((data) => {
+        setApiCategories(Array.isArray(data) ? data : []);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setCategoryError(error.message || "Failed to load categories");
+        }
+      })
+      .finally(() => {
+        setIsLoadingCategories(false);
+      });
 
-  const hasActiveFilters =
-    selectedCategories.length > 0 || selectedSubcategories.length > 0;
+    return () => controller.abort();
+  }, []);
 
-  const goToPage = (page) => {
-    const clamped = Math.min(Math.max(page, 1), totalPages);
-    setCurrentPage(clamped);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const normalizeProduct = (item) => {
+    const rawPrice = item?.averagePrice ?? item?.price ?? 0;
+    const priceNumber = Number(rawPrice) || 0;
+    const originalPriceNumber = Number(item?.originalPrice ?? rawPrice) || priceNumber;
+    const image =
+      item?.productImage && item.productImage.trim() !== ""
+        ? item.productImage
+        : "/images/no-image.jpg";
+    const id =
+      item?.id ??
+      item?.internalId ??
+      item?.code ??
+      `product-${Math.random().toString(36).slice(2)}`;
+
+    return {
+      id,
+      name: item?.name ?? "Unnamed product",
+      code: item?.code ?? "",
+      price: priceNumber,
+      originalPrice: originalPriceNumber,
+      image,
+      inStock: item?.isActive !== false,
+      raw: item,
+    };
   };
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchProducts = async () => {
+      setIsLoadingProducts(true);
+      setProductError(null);
+
+      const skipCount = Math.max(0, (currentPage - 1) * PAGE_SIZE);
+      const sortTypeValue = Number(sortBy) || DEFAULT_SORT_TYPE;
+      const trimmedSearch = debouncedSearch.trim();
+
+      const categoryIds =
+        selectedCategories.length > 0
+          ? Array.from(
+              new Set(
+                selectedCategories
+                  .map((value) => Number(value))
+                  .filter((value) => !Number.isNaN(value))
+              )
+            )
+          : null;
+
+      const subCategoryIds =
+        selectedSubcategories.length > 0
+          ? Array.from(
+              new Set(
+                selectedSubcategories
+                  .map((key) => key.split("::")[1])
+                  .filter(Boolean)
+                  .map((value) => Number(value))
+                  .filter((value) => !Number.isNaN(value))
+              )
+            )
+          : null;
+
+      const payload = {
+        input: {
+          skipCount,
+          maxResultCount: PAGE_SIZE,
+          search: trimmedSearch,
+        },
+        categoryIds: categoryIds && categoryIds.length > 0 ? categoryIds : null,
+        subCategoryIds:
+          subCategoryIds && subCategoryIds.length > 0 ? subCategoryIds : null,
+        sortType: sortTypeValue,
+      };
+
+      try {
+        const response = await fetch(PRODUCTS_ENDPOINT, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok || (data && data.statusCode && data.statusCode !== 200)) {
+          throw new Error(data?.message || "Failed to load products");
+        }
+
+        const result = data?.result ?? {};
+        const items = Array.isArray(result.items) ? result.items : [];
+        setProductItems(items.map((item) => normalizeProduct(item)));
+        setTotalCount(Number(result.totalCount) || items.length);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setProductError(error.message || "Failed to load products");
+          setProductItems([]);
+          setTotalCount(0);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingProducts(false);
+        }
+      }
+    };
+
+    fetchProducts();
+
+    return () => controller.abort();
+  }, [currentPage, debouncedSearch, selectedCategories, selectedSubcategories, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil((totalCount || 0) / PAGE_SIZE));
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -341,13 +316,45 @@ export default function ShopPage() {
     }
   }, [currentPage, totalPages]);
 
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "price-low") return a.price - b.price;
-    if (sortBy === "price-high") return b.price - a.price;
-    if (sortBy === "rating") return b.rating - a.rating;
-    return 0;
-  });
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    sortBy !== DEFAULT_SORT_TYPE ||
+    selectedCategories.length > 0 ||
+    selectedSubcategories.length > 0;
+
+  const derivedCategories = useMemo(
+    () =>
+      apiCategories.map((category, index) => {
+        const categoryIdSource =
+          category?.categoryId ?? category?.categoryName ?? `category-${index}`;
+        const categoryId = String(categoryIdSource);
+
+        return {
+          key: categoryId,
+          id: categoryId,
+          name: category?.categoryName || categoryId,
+          itemCount: category?.itemCount ?? 0,
+          subcategories: (category?.subCategories ?? []).map((sub, subIndex) => {
+            const subCategorySource =
+              sub?.subCategoryId ?? sub?.subCategoryName ?? `${categoryIdSource}-${subIndex}`;
+            const subId = String(subCategorySource);
+            return {
+              key: makeSubKey(categoryId, subId),
+              id: subId,
+              name: sub?.subCategoryName || subId,
+              itemCount: sub?.itemCount ?? 0,
+            };
+          }),
+        };
+      }),
+    [apiCategories]
+  );
+  const categoriesToRender = derivedCategories;
+
+  const goToPage = (page) => {
+    const clamped = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(clamped);
+  };
 
   return (
     <Box
@@ -360,7 +367,7 @@ export default function ShopPage() {
     >
       <Container maxWidth="lg">
         <Box
-          sx={{
+            sx={{
             display: { xs: "flex", md: "grid" },
             gridTemplateColumns: { md: "280px 1fr" },
             gap: 2,
@@ -368,8 +375,8 @@ export default function ShopPage() {
           }}
         >
           <Box sx={{ display: { xs: "none", md: "block" } }}>
-            <Box
-              sx={{
+        <Box
+          sx={{
                 position: "sticky",
                 top: "calc(var(--header-offset) + 24px)",
                 background: "var(--color-surface)",
@@ -388,19 +395,19 @@ export default function ShopPage() {
                 <Typography sx={{ fontWeight: 700, fontSize: 18, color: "var(--color-text)" }}>
                   Filters
                 </Typography>
-                <Button
+          <Button
                   variant="text"
                   onClick={handleResetFilters}
                   disabled={!hasActiveFilters}
-                  sx={{
-                    textTransform: "none",
+            sx={{
+              textTransform: "none",
                     color: "var(--color-muted-text)",
                     fontWeight: 500,
                     opacity: hasActiveFilters ? 1 : 0.4,
-                  }}
-                >
+            }}
+          >
                   Clear All
-                </Button>
+          </Button>
               </Box>
 
               <Box>
@@ -411,17 +418,27 @@ export default function ShopPage() {
                   Categories
                 </Typography>
 
+                {categoryError && (
+                  <Typography variant="body2" sx={{ color: "#dc2626", mt: 1.5 }}>
+                    {categoryError}
+                  </Typography>
+                )}
+
                 <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-                  {categoryGroups
-                    .filter((group) => group.name !== "All")
-                    .map((group) => {
-                      const isSelected = selectedCategories.includes(group.name);
-                      const isExpanded = expandedSections.includes(group.name);
-                      const count = categoryCounts[group.name] || 0;
+                  {isLoadingCategories && derivedCategories.length === 0 ? (
+                    <Typography variant="body2" sx={{ color: "var(--color-muted-text)" }}>
+                      Loading categories...
+                    </Typography>
+                  ) : (
+                    categoriesToRender.map((group) => {
+                      const groupKey = String(group.key);
+                      const isSelected = selectedCategories.includes(groupKey);
+                      const isExpanded = expandedSections.includes(groupKey);
+                      const count = group.itemCount ?? 0;
                       return (
-                        <Box key={group.name} sx={{ borderBottom: "1px solid rgba(148,163,184,0.2)", pb: 1.5 }}>
+                        <Box key={groupKey} sx={{ borderBottom: "1px solid rgba(148,163,184,0.2)", pb: 1.5 }}>
                           <Box
-                            sx={{
+            sx={{
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
@@ -432,7 +449,7 @@ export default function ShopPage() {
                               control={
                                 <Checkbox
                                   checked={isSelected}
-                                  onChange={() => toggleCategorySelection(group.name)}
+                                  onChange={() => toggleCategorySelection(groupKey)}
                                   sx={{
                                     color: "var(--color-border)",
                                     '&.Mui-checked': { color: "var(--color-primary)" },
@@ -441,33 +458,35 @@ export default function ShopPage() {
                               }
                               label={
                                 <Typography sx={{ fontWeight: 600, letterSpacing: 0.5, color: "var(--color-text)" }}>
-                                  {group.label}
+                                  {group.name}
                                 </Typography>
                               }
                               sx={{ margin: 0, flexGrow: 1 }}
                             />
                             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                               <Typography sx={{ fontSize: 12, color: "var(--color-muted-text)", fontWeight: 600 }}>
-                                {count}
+                                {group.itemCount}
                               </Typography>
-                              <IconButton size="small" onClick={() => toggleSectionExpansion(group.name)}>
+                              <IconButton size="small" onClick={() => toggleSectionExpansion(groupKey)}>
                                 {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                               </IconButton>
                             </Box>
-                          </Box>
+        </Box>
 
                           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ pl: 1, pt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                              {group.subcategories.map((subcategory) => {
-                                const subKey = makeSubKey(group.name, subcategory);
+                              {(group.subcategories || []).map((subcategory) => {
+                                const subId = String(subcategory.id);
+                                const subLabel = subcategory.name || subId;
+                                const subKey = makeSubKey(groupKey, subId);
                                 const subSelected = selectedSubcategories.includes(subKey);
-                                const subCount = subcategoryCounts[subKey] || 0;
+                                const subCount = subcategory.itemCount ?? 0;
                                 return (
                                   <Box
                                     key={subKey}
-                                    sx={{
+          sx={{
                                       display: "flex",
-                                      alignItems: "center",
+            alignItems: "center",
                                       justifyContent: "space-between",
                                       gap: 1,
                                     }}
@@ -476,8 +495,8 @@ export default function ShopPage() {
                                       control={
                                         <Checkbox
                                           checked={subSelected}
-                                          onChange={() => toggleSubcategorySelection(group.name, subcategory)}
-                                          sx={{
+                                          onChange={() => toggleSubcategorySelection(groupKey, subId)}
+              sx={{
                                             color: "var(--color-border)",
                                             '&.Mui-checked': { color: "var(--color-secondary)" },
                                           }}
@@ -485,7 +504,7 @@ export default function ShopPage() {
                                       }
                                       label={
                                         <Typography sx={{ fontSize: 14, color: "var(--color-text)" }}>
-                                          {subcategory}
+                                          {subLabel}
                                         </Typography>
                                       }
                                       sx={{ margin: 0, flexGrow: 1, pl: 1.5 }}
@@ -493,14 +512,15 @@ export default function ShopPage() {
                                     <Typography sx={{ fontSize: 12, color: "var(--color-muted-text)", fontWeight: 600 }}>
                                       {subCount}
                                     </Typography>
-                                  </Box>
+          </Box>
                                 );
                               })}
                             </Box>
                           </Collapse>
                         </Box>
                       );
-                    })}
+                    })
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -508,7 +528,7 @@ export default function ShopPage() {
 
           <Box sx={{ width: "100%" }}>
             <Box
-              sx={{
+            sx={{
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 alignItems: { xs: "stretch", md: "center" },
@@ -523,20 +543,20 @@ export default function ShopPage() {
                 sx={{
                   display: { xs: "inline-flex", md: "none" },
                   borderColor: "var(--color-border)",
-                  color: "var(--color-text)",
+              color: "var(--color-text)",
                   textTransform: "none",
                   height: CONTROL_HEIGHT,
                   px: 2,
-                }}
-              >
-                Filters
-              </Button>
+          }}
+        >
+              Filters
+            </Button>
 
               <TextField
                 fullWidth
                 placeholder="Search products, categories, or collections..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchInputChange(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -544,7 +564,7 @@ export default function ShopPage() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{
+                      sx={{
                   "& .MuiOutlinedInput-root": {
                     background: "var(--color-surface)",
                     borderRadius: 2,
@@ -558,64 +578,64 @@ export default function ShopPage() {
                     "&.Mui-focused fieldset": {
                       borderColor: "var(--color-primary)",
                     },
-                  },
-                }}
-              />
+                        },
+                      }}
+                    />
 
-              <FormControl
-                size="small"
-                sx={{
+                <FormControl
+                  size="small"
+                  sx={{
                   width: { xs: "100%", md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    background: "var(--color-surface)",
-                    color: "var(--color-text)",
+                    "& .MuiOutlinedInput-root": {
+                      background: "var(--color-surface)",
+                      color: "var(--color-text)",
                     height: CONTROL_HEIGHT,
-                    "& fieldset": {
-                      borderColor: "var(--color-border)",
+                      "& fieldset": {
+                        borderColor: "var(--color-border)",
+                      },
                     },
-                  },
-                }}
-              >
-                <InputLabel sx={{ color: "var(--color-text)" }}>Sort By</InputLabel>
-                <Select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  label="Sort By"
+                  }}
                 >
-                  <MenuItem value="default">Default</MenuItem>
-                  <MenuItem value="price-low">Price: Low to High</MenuItem>
-                  <MenuItem value="price-high">Price: High to Low</MenuItem>
-                  <MenuItem value="rating">Highest Rated</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  <InputLabel sx={{ color: "var(--color-text)" }}>Sort By</InputLabel>
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    label="Sort By"
+                  >
+                    <MenuItem value={1}>Price: Low to High</MenuItem>
+                    <MenuItem value={2}>Price: High to Low</MenuItem>
+                    <MenuItem value={3}>Newest On Top</MenuItem>
+                    <MenuItem value={4}>Oldest On Top</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
             <Box
-              sx={{
+          sx={{
                 display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
                 justifyContent: "space-between",
                 alignItems: { xs: "flex-start", sm: "center" },
                 gap: 2,
-                mb: 3,
-              }}
-            >
+            mb: 3,
+          }}
+        >
               <Box>
                 <Typography variant="subtitle2" sx={{ color: "var(--color-muted-text)" }}>
-                  Showing {sortedProducts.length} product{sortedProducts.length !== 1 ? "s" : ""}
-                </Typography>
+                  Showing {totalCount} product{totalCount !== 1 ? "s" : ""}
+        </Typography>
                 <Stack
                   direction="row"
-                  spacing={1}
-                  sx={{
+          spacing={1} 
+          sx={{ 
                     mt: 1,
-                    flexWrap: "wrap",
+            flexWrap: "wrap",
                     display: hasActiveFilters ? "flex" : "none",
                   }}
                 >
                   {selectedCategories.map((category) => {
                     const categoryLabel =
-                      categoryGroups.find((group) => group.name === category)?.label || category;
+                      categoriesToRender.find((group) => String(group.id) === category)?.name || category;
                     return (
                       <Chip
                         key={`category-${category}`}
@@ -626,12 +646,19 @@ export default function ShopPage() {
                     );
                   })}
                   {selectedSubcategories.map((subKey) => {
-                    const [categoryName, subcategoryName] = subKey.split("::");
+                    const [categoryId, subcategoryId] = subKey.split("::");
+                    const categoryGroup = categoriesToRender.find(
+                      (group) => String(group.id) === String(categoryId)
+                    );
+                    const subcategoryLabel =
+                      categoryGroup?.subcategories.find(
+                        (subcategory) => String(subcategory.id) === String(subcategoryId)
+                      )?.name || subcategoryId;
                     return (
                       <Chip
                         key={`subcategory-${subKey}`}
-                        label={`Subcategory: ${subcategoryName}`}
-                        onDelete={() => clearSubcategorySelection(categoryName, subcategoryName)}
+                        label={`Subcategory: ${subcategoryLabel}`}
+                        onDelete={() => clearSubcategorySelection(categoryId, subcategoryId)}
                         sx={{ background: "var(--color-secondary)", color: "var(--color-text)" }}
                       />
                     );
@@ -647,8 +674,14 @@ export default function ShopPage() {
               </Box>
             </Box>
 
+            {productError && (
+              <Typography variant="body2" sx={{ color: "#dc2626", mb: 2 }}>
+                {productError}
+              </Typography>
+            )}
+
             <Box
-              sx={{
+              sx={{ 
                 display: "grid",
                 gap: 2,
                 gridTemplateColumns: {
@@ -660,69 +693,77 @@ export default function ShopPage() {
                 },
               }}
             >
-              {visibleProducts.map((product) => (
-                <Card
+              {isLoadingProducts && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: "var(--color-muted-text)", gridColumn: "1 / -1" }}
+                >
+                  Loading products...
+                </Typography>
+              )}
+              {productItems.map((product) => (
+              <Card
                   key={product.id}
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
                     borderRadius: 3,
-                    border: "1px solid var(--color-border)",
+                  border: "1px solid var(--color-border)",
                     background: "var(--color-surface)",
                     boxShadow: isDark
                       ? "0 6px 18px rgba(0,0,0,0.3)"
                       : "0 12px 32px rgba(15,23,42,0.08)",
                     transition: "transform 200ms ease, box-shadow 200ms ease",
-                    "&:hover": {
+                  "&:hover": {
                       transform: "translateY(-6px)",
-                      boxShadow: isDark
+                    boxShadow: isDark
                         ? "0 12px 32px rgba(0,119,182,0.35)"
                         : "0 16px 32px rgba(0,119,182,0.16)",
-                      borderColor: "var(--color-primary)",
-                    },
-                  }}
-                >
-                  <Box sx={{ position: "relative" }}>
-                    <CardMedia
-                      component="img"
+                    borderColor: "var(--color-primary)",
+                  },
+                }}
+              >
+                <Box sx={{ position: "relative" }}>
+                  <CardMedia
+                    component="img"
                       height="200"
-                      image={product.image}
-                      alt={product.name}
-                      onError={(e) => {
-                        e.target.src = "/images/no-image.jpg";
-                      }}
+                    image={product.image}
+                    alt={product.name}
+                    onError={(e) => {
+                      e.target.src = "/images/no-image.jpg";
+                    }}
                       sx={{ objectFit: "cover" }}
-                    />
-                    {!product.inStock && (
+                  />
+                  {!product.inStock && (
                       <Chip
                         label="Out of stock"
                         size="small"
-                        sx={{
-                          position: "absolute",
+                      sx={{
+                        position: "absolute",
                           top: 12,
                           right: 12,
                           background: "rgba(15,23,42,0.85)",
                           color: "#fff",
-                          fontWeight: 600,
-                        }}
+                        fontWeight: 600,
+                      }}
                       />
-                    )}
-                    {product.originalPrice > product.price && (
-                      <Chip
-                        label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`}
-                        size="small"
-                        sx={{
-                          position: "absolute",
+                  )}
+                  {product.originalPrice > product.price && (
+                    <Chip
+                      label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`}
+                      size="small"
+                      sx={{
+                        position: "absolute",
                           top: 12,
                           left: 12,
                           background: "var(--color-primary)",
                           color: "#fff",
-                          fontWeight: 700,
-                        }}
-                      />
-                    )}
-                  </Box>
+                        fontWeight: 700,
+                      }}
+                    />
+                  )}
+                </Box>
                   <CardContent
                     sx={{
                       p: 3,
@@ -733,100 +774,100 @@ export default function ShopPage() {
                     }}
                   >
                    
-                    <Typography
+                  <Typography
                       variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        color: "var(--color-text)",
+                    sx={{
+                      fontWeight: 600,
+                      color: "var(--color-text)",
                         lineHeight: 1.3,
-                      }}
-                    >
-                      {product.name}
-                    </Typography>
+                    }}
+                  >
+                    {product.name}
+                  </Typography>
                     <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
                       <Typography sx={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
-                        Rs. {product.price.toLocaleString()}
-                      </Typography>
-                      {product.originalPrice > product.price && (
+                      Rs. {product.price.toLocaleString()}
+                    </Typography>
+                    {product.originalPrice > product.price && (
                         <Typography sx={{ color: "var(--color-muted-text)", textDecoration: "line-through" }}>
-                          Rs. {product.originalPrice.toLocaleString()}
-                        </Typography>
-                      )}
-                    </Box>
+                        Rs. {product.originalPrice.toLocaleString()}
+                      </Typography>
+                    )}
+                  </Box>
                     <Box sx={{ mt: "auto" }}>
-                      {quantities[product.id] && quantities[product.id] > 0 ? (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 1,
-                            border: "1px solid var(--color-border)",
+                  {quantities[product.id] && quantities[product.id] > 0 ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        border: "1px solid var(--color-border)",
                             borderRadius: 999,
                             py: 1,
-                            px: 1,
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() => handleQuantityChange(product.id, -1)}
-                            disabled={quantities[product.id] <= 1}
-                            sx={{
+                        px: 1,
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(product.id, -1)}
+                        disabled={quantities[product.id] <= 1}
+                        sx={{
                               width: 36,
                               height: 36,
-                              color: "var(--color-text)",
-                              "&:hover": {
-                                bgcolor: "var(--color-primary)15",
-                                color: "var(--color-primary)",
-                              },
-                            }}
-                          >
+                          color: "var(--color-text)",
+                          "&:hover": {
+                            bgcolor: "var(--color-primary)15",
+                            color: "var(--color-primary)",
+                          },
+                        }}
+                      >
                             <RemoveIcon fontSize="small" />
-                          </IconButton>
+                      </IconButton>
                           <Typography sx={{ minWidth: 36, textAlign: "center", fontWeight: 600 }}>
-                            {quantities[product.id]}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleQuantityChange(product.id, 1)}
-                            disabled={!product.inStock}
-                            sx={{
+                        {quantities[product.id]}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(product.id, 1)}
+                        disabled={!product.inStock}
+                        sx={{
                               width: 36,
                               height: 36,
-                              color: "var(--color-text)",
-                              "&:hover": {
-                                bgcolor: "var(--color-primary)15",
-                                color: "var(--color-primary)",
-                              },
-                            }}
-                          >
+                          color: "var(--color-text)",
+                          "&:hover": {
+                            bgcolor: "var(--color-primary)15",
+                            color: "var(--color-primary)",
+                          },
+                        }}
+                      >
                             <AddIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
-                          disabled={!product.inStock}
-                          onClick={() => handleAddToBag(product.id)}
-                          sx={{
-                            textTransform: "none",
-                            fontWeight: 600,
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
+                      disabled={!product.inStock}
+                      onClick={() => handleAddToBag(product.id)}
+                      sx={{
+                        textTransform: "none",
+                        fontWeight: 600,
                             bgcolor: "var(--color-primary)",
                             "&:hover": { bgcolor: "var(--color-secondary)" },
                           }}
                         >
                           {product.inStock ? "Add to bag" : "Out of stock"}
-                        </Button>
-                      )}
+                    </Button>
+                  )}
                     </Box>
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               ))}
             </Box>
 
-            {sortedProducts.length > 0 && totalPages > 1 && (
+            {productItems.length > 0 && totalPages > 1 && (
               <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
                 <Pagination
                   count={totalPages}
@@ -838,13 +879,13 @@ export default function ShopPage() {
               </Box>
             )}
 
-            {sortedProducts.length === 0 && (
-              <Box
-                sx={{
-                  textAlign: "center",
-                  py: { xs: 6, md: 8 },
-                }}
-              >
+        {!isLoadingProducts && !productError && productItems.length === 0 && (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: { xs: 6, md: 8 },
+            }}
+          >
                 <Typography variant="h6" sx={{ color: "var(--color-text)", mb: 1 }}>
                   No products found
                 </Typography>
@@ -864,10 +905,10 @@ export default function ShopPage() {
           PaperProps={{
             sx: {
               background: "var(--color-surface)",
-              color: "var(--color-text)",
+                color: "var(--color-text)",
             },
-          }}
-        >
+              }}
+            >
           <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Filters
@@ -883,12 +924,11 @@ export default function ShopPage() {
                   Categories
                 </Typography>
                 <Button
-                  variant="text"
                   onClick={handleResetFilters}
                   disabled={!hasActiveFilters}
-                  sx={{
+              sx={{
                     textTransform: "none",
-                    color: "var(--color-muted-text)",
+                color: "var(--color-muted-text)",
                     opacity: hasActiveFilters ? 1 : 0.4,
                   }}
                 >
@@ -897,20 +937,21 @@ export default function ShopPage() {
               </Box>
 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                {categoryGroups
+                {categoriesToRender
                   .filter((group) => group.name !== "All")
                   .map((group) => {
-                    const isSelected = selectedCategories.includes(group.name);
-                    const isExpanded = expandedSections.includes(group.name);
-                    const count = categoryCounts[group.name] || 0;
+                    const groupKey = String(group.key);
+                    const isSelected = selectedCategories.includes(groupKey);
+                    const isExpanded = expandedSections.includes(groupKey);
+                    const count = group.itemCount ?? 0;
                     return (
-                      <Box key={`mobile-${group.name}`} sx={{ borderBottom: "1px solid rgba(148,163,184,0.2)", pb: 1.5 }}>
+                      <Box key={`mobile-${groupKey}`} sx={{ borderBottom: "1px solid rgba(148,163,184,0.2)", pb: 1.5 }}>
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 checked={isSelected}
-                                onChange={() => toggleCategorySelection(group.name)}
+                                onChange={() => toggleCategorySelection(groupKey)}
                                 sx={{
                                   color: "var(--color-border)",
                                   '&.Mui-checked': { color: "var(--color-primary)" },
@@ -919,8 +960,8 @@ export default function ShopPage() {
                             }
                             label={
                               <Typography sx={{ fontWeight: 600, color: "var(--color-text)" }}>
-                                {group.label}
-                              </Typography>
+                                {group.name}
+            </Typography>
                             }
                             sx={{ margin: 0, flexGrow: 1 }}
                           />
@@ -928,17 +969,19 @@ export default function ShopPage() {
                             <Typography sx={{ fontSize: 12, color: "var(--color-muted-text)", fontWeight: 600 }}>
                               {count}
                             </Typography>
-                            <IconButton size="small" onClick={() => toggleSectionExpansion(group.name)}>
+                            <IconButton size="small" onClick={() => toggleSectionExpansion(groupKey)}>
                               {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                             </IconButton>
-                          </Box>
+          </Box>
                         </Box>
                         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                           <Box sx={{ pl: 1, pt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                            {group.subcategories.map((subcategory) => {
-                              const subKey = makeSubKey(group.name, subcategory);
+                            {(group.subcategories || []).map((subcategory) => {
+                              const subId = String(subcategory.id);
+                              const subLabel = subcategory.name || subId;
+                              const subKey = makeSubKey(groupKey, subId);
                               const subSelected = selectedSubcategories.includes(subKey);
-                              const subCount = subcategoryCounts[subKey] || 0;
+                              const subCount = subcategory.itemCount ?? 0;
                               return (
                                 <Box
                                   key={`mobile-${subKey}`}
@@ -952,7 +995,7 @@ export default function ShopPage() {
                                     control={
                                       <Checkbox
                                         checked={subSelected}
-                                        onChange={() => toggleSubcategorySelection(group.name, subcategory)}
+                                        onChange={() => toggleSubcategorySelection(groupKey, subId)}
                                         sx={{
                                           color: "var(--color-border)",
                                           '&.Mui-checked': { color: "var(--color-secondary)" },
@@ -961,7 +1004,7 @@ export default function ShopPage() {
                                     }
                                     label={
                                       <Typography sx={{ fontSize: 14, color: "var(--color-text)" }}>
-                                        {subcategory}
+                                        {subLabel}
                                       </Typography>
                                     }
                                     sx={{ margin: 0, flexGrow: 1, pl: 1.5 }}
@@ -1001,13 +1044,13 @@ export default function ShopPage() {
                   <InputLabel sx={{ color: "var(--color-text)" }}>Sort By</InputLabel>
                   <Select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e) => handleSortChange(e.target.value)}
                     label="Sort By"
                   >
-                    <MenuItem value="default">Default</MenuItem>
-                    <MenuItem value="price-low">Price: Low to High</MenuItem>
-                    <MenuItem value="price-high">Price: High to Low</MenuItem>
-                    <MenuItem value="rating">Highest Rated</MenuItem>
+                    <MenuItem value={1}>Price: Low to High</MenuItem>
+                    <MenuItem value={2}>Price: High to Low</MenuItem>
+                    <MenuItem value={3}>Newest On Top</MenuItem>
+                    <MenuItem value={4}>Oldest On Top</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
