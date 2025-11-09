@@ -5,6 +5,7 @@ import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import CssBaseline from "@mui/material/CssBaseline";
 import AppMain from "../components/AppMain";
+import { CartProvider } from "../context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +34,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable}`}>
         <ThemeProvider>
-          <CssBaseline />
-          <SiteHeader />
-          <AppMain>{children}</AppMain>
-          <SiteFooter />
+          <CartProvider>
+            <CssBaseline />
+            <SiteHeader />
+            <AppMain>{children}</AppMain>
+            <SiteFooter />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

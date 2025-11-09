@@ -11,13 +11,14 @@ import { Button, IconButton, Box, Typography } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
-  const cartCount = 0;
+  const { cartCount } = useCart();
   const helpline = "(+94) 077 377 1726";
   const isHomePage = pathname === "/";
   const shouldShowBackground = scrolled || !isHomePage;

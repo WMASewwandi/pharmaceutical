@@ -39,6 +39,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTheme } from "../../components/ThemeProvider";
 import { fetchCategoriesWithCounts } from "@/lib/api/categories";
 import { apiUrl } from "@/lib/apiConfig";
+import { useCart } from "@/context/CartContext";
 
 const PAGE_SIZE = 9;
 const DEFAULT_CATEGORY_IDS = [];
@@ -57,7 +58,6 @@ export default function ShopPage() {
   const [expandedSections, setExpandedSections] = useState([]);
   const [sortBy, setSortBy] = useState(DEFAULT_SORT_TYPE);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [quantities, setQuantities] = useState({});
   const CONTROL_HEIGHT = 48;
   const [apiCategories, setApiCategories] = useState([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
@@ -67,6 +67,7 @@ export default function ShopPage() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [productError, setProductError] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const { addItem, updateItemQuantity, removeItem, items: cartItems } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
 
   const toggleSectionExpansion = (categoryName) => {
@@ -147,25 +148,6 @@ export default function ShopPage() {
     const numericValue = Number(value);
     setSortBy(Number.isNaN(numericValue) ? DEFAULT_SORT_TYPE : numericValue);
     setCurrentPage(1);
-  };
-
-  const handleQuantityChange = (productId, change) => {
-    setQuantities((prev) => {
-      const currentQty = prev[productId] || 0;
-      const newQty = Math.max(0, currentQty + change);
-      if (newQty === 0) {
-        const { [productId]: removed, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [productId]: newQty };
-    });
-  };
-
-  const handleAddToBag = (productId) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1,
-    }));
   };
 
   useEffect(() => {
@@ -350,6 +332,14 @@ export default function ShopPage() {
     [apiCategories]
   );
   const categoriesToRender = derivedCategories;
+
+  const cartItemsMap = useMemo(() => {
+    const map = new Map();
+    cartItems.forEach((item) => {
+      map.set(String(item.id), item);
+    });
+    return map;
+  }, [cartItems]);
 
   const goToPage = (page) => {
     const clamped = Math.min(Math.max(page, 1), totalPages);
@@ -795,7 +785,11 @@ export default function ShopPage() {
                     )}
                   </Box>
                     <Box sx={{ mt: "auto" }}>
-                  {quantities[product.id] && quantities[product.id] > 0 ? (
+                  {(() => {
+                    const cartEntry = cartItemsMap.get(String(product.id));
+                    const quantity = cartEntry?.quantity ?? 0;
+                    if (quantity > 0) {
+                      return (
                     <Box
                       sx={{
                         display: "flex",
@@ -810,8 +804,12 @@ export default function ShopPage() {
                     >
                       <IconButton
                         size="small"
-                        onClick={() => handleQuantityChange(product.id, -1)}
-                        disabled={quantities[product.id] <= 1}
+                        onClick={() =>
+                          quantity <= 1
+                            ? removeItem(product.id)
+                            : updateItemQuantity(product.id, quantity - 1)
+                        }
+                        disabled={quantity <= 0}
                         sx={{
                               width: 36,
                               height: 36,
@@ -825,11 +823,11 @@ export default function ShopPage() {
                             <RemoveIcon fontSize="small" />
                       </IconButton>
                           <Typography sx={{ minWidth: 36, textAlign: "center", fontWeight: 600 }}>
-                        {quantities[product.id]}
+                        {quantity}
                       </Typography>
                       <IconButton
                         size="small"
-                        onClick={() => handleQuantityChange(product.id, 1)}
+                        onClick={() => updateItemQuantity(product.id, quantity + 1)}
                         disabled={!product.inStock}
                         sx={{
                               width: 36,
@@ -844,13 +842,15 @@ export default function ShopPage() {
                             <AddIcon fontSize="small" />
                       </IconButton>
                     </Box>
-                  ) : (
+                      );
+                    }
+                    return (
                     <Button
                       variant="contained"
                       fullWidth
                       startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
                       disabled={!product.inStock}
-                      onClick={() => handleAddToBag(product.id)}
+                      onClick={() => addItem(product, 1)}
                       sx={{
                         textTransform: "none",
                         fontWeight: 600,
@@ -860,7 +860,8 @@ export default function ShopPage() {
                         >
                           {product.inStock ? "Add to bag" : "Out of stock"}
                     </Button>
-                  )}
+                    );
+                  })()}
                     </Box>
                 </CardContent>
               </Card>

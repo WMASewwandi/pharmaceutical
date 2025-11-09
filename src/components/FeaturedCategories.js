@@ -1,50 +1,63 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import SpaIcon from "@mui/icons-material/Spa";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ChildCareIcon from "@mui/icons-material/ChildCare";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { useTheme } from "./ThemeProvider";
+import { apiUrl } from "@/lib/apiConfig";
 
-const categories = [
-  {
-    href: "/categories/herbal-ayurvedic",
-    label: "Herbal & Ayurvedic",
-    icon: SpaIcon,
-    color: "#00B4D8",
-  },
-  {
-    href: "/categories/personal-care",
-    label: "Personal Care",
-    icon: FavoriteIcon,
-    color: "#90E0EF",
-  },
-  {
-    href: "/categories/baby-care",
-    label: "Baby Care",
-    icon: ChildCareIcon,
-    color: "#0077B6",
-  },
-  {
-    href: "/categories/vitamins-supplements",
-    label: "Vitamins & Supplements",
-    icon: FitnessCenterIcon,
-    color: "#00B4D8",
-  },
-  {
-    href: "/categories/health-devices",
-    label: "Health Devices",
-    icon: MedicalServicesIcon,
-    color: "#90E0EF",
-  },
-];
+const FEATURED_LIMIT = 5;
+const FALLBACK_IMAGE = "/images/no-image.jpg";
 
 export default function FeaturedCategories() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchCategories = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(apiUrl("Category/GetAllWebCategory"), {
+          method: "GET",
+          signal: controller.signal,
+        });
+
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok || (payload && payload.statusCode && payload.statusCode !== 200)) {
+          throw new Error(payload?.message || "Failed to load featured categories");
+        }
+
+        const result = Array.isArray(payload?.result) ? payload.result : [];
+        setCategories(result);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setError(err.message || "Failed to load featured categories");
+          setCategories([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchCategories();
+
+    return () => controller.abort();
+  }, []);
+
+  const categoriesToDisplay = useMemo(
+    () => categories.slice(0, FEATURED_LIMIT),
+    [categories]
+  );
 
   return (
     <Box
@@ -80,6 +93,13 @@ export default function FeaturedCategories() {
           Quick Shop by Category
         </Typography>
       </Box>
+
+      {error && (
+        <Typography variant="body2" sx={{ color: "#dc2626", mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+
       <Box
         sx={{
           display: "flex",
@@ -88,113 +108,133 @@ export default function FeaturedCategories() {
           justifyContent: "center",
         }}
       >
-        {categories.map((category) => {
-          const IconComponent = category.icon;
-          return (
-            <Box
-              key={category.href}
-              sx={{
-                flex: { xs: "0 0 calc(50% - 8px)", sm: "0 0 calc(33.333% - 13.33px)", md: "0 0 calc(20% - 12px)" },
-                minWidth: { xs: "calc(50% - 8px)", sm: "calc(33.333% - 13.33px)", md: "calc(20% - 12px)" },
-                maxWidth: { xs: "calc(50% - 8px)", sm: "calc(33.333% - 13.33px)", md: "calc(20% - 12px)" },
-              }}
-            >
-              <Link href={category.href} style={{ textDecoration: "none" }}>
-                <Card
+        {isLoading && categoriesToDisplay.length === 0
+          ? Array.from({ length: FEATURED_LIMIT }).map((_, index) => (
+              <Card
+                key={`placeholder-${index}`}
+                sx={{
+                  flex: {
+                    xs: "0 0 calc(50% - 8px)",
+                    sm: "0 0 calc(33.333% - 13.33px)",
+                    md: "0 0 calc(20% - 12px)",
+                  },
+                  minWidth: {
+                    xs: "calc(50% - 8px)",
+                    sm: "calc(33.333% - 13.33px)",
+                    md: "calc(20% - 12px)",
+                  },
+                  height: { xs: 140, md: 160 },
+                  borderRadius: 3,
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-surface)",
+                  boxShadow: isDark
+                    ? "0 2px 8px rgba(0,0,0,0.4)"
+                    : "0 2px 8px rgba(15,23,42,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "var(--color-muted-text)" }}>
+                  Loading...
+                </Typography>
+              </Card>
+            ))
+          : categoriesToDisplay.map((category) => {
+              const imageSource =
+                typeof category?.categoryImage === "string" && category.categoryImage.trim() !== ""
+                  ? category.categoryImage
+                  : FALLBACK_IMAGE;
+              const linkHref = `/shop?category=${category?.id ?? ""}`;
+
+              return (
+                <Box
+                  key={category.id ?? category.internalId ?? category.name}
                   sx={{
-                    height: { xs: 140, md: 160 },
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: { xs: 2, md: 3 },
-                    cursor: "pointer",
-                    transition: "all 250ms cubic-bezier(0.4, 0, 0.2, 1)",
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 3,
-                    boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.5)" : "0 2px 8px rgba(0,0,0,0.04)",
-                    position: "relative",
-                    overflow: "hidden",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 4,
-                      background: `linear-gradient(90deg, ${category.color}, ${category.color}dd)`,
-                      transform: "scaleX(0)",
-                      transformOrigin: "left",
-                      transition: "transform 250ms ease",
+                    flex: {
+                      xs: "0 0 calc(50% - 8px)",
+                      sm: "0 0 calc(33.333% - 13.33px)",
+                      md: "0 0 calc(20% - 12px)",
                     },
-                    "&:hover": {
-                      transform: "translateY(-6px)",
-                      boxShadow: isDark 
-                        ? "0 12px 32px rgba(0, 119, 182, 0.5)" 
-                        : "0 12px 32px rgba(0, 119, 182, 0.16)",
-                      borderColor: category.color,
-                      "&::before": {
-                        transform: "scaleX(1)",
-                      },
-                      "& .category-icon": {
-                        transform: "scale(1.1) rotate(5deg)",
-                      },
+                    minWidth: {
+                      xs: "calc(50% - 8px)",
+                      sm: "calc(33.333% - 13.33px)",
+                      md: "calc(20% - 12px)",
+                    },
+                    maxWidth: {
+                      xs: "calc(50% - 8px)",
+                      sm: "calc(33.333% - 13.33px)",
+                      md: "calc(20% - 12px)",
                     },
                   }}
                 >
-                  <CardContent
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: { xs: 1.5, md: 2 },
-                      p: "0 !important",
-                      "&:last-child": { pb: "0 !important" },
-                      width: "100%",
-                    }}
-                  >
-                    <Box
-                      className="category-icon"
+                  <Link href={linkHref} style={{ textDecoration: "none" }}>
+                    <Card
                       sx={{
-                        width: { xs: 56, md: 64 },
-                        height: { xs: 56, md: 64 },
-                        borderRadius: "50%",
-                        background: isDark
-                          ? `linear-gradient(135deg, ${category.color}35, ${category.color}18)`
-                          : `linear-gradient(135deg, ${category.color}20, ${category.color}08)`,
+                        height: { xs: 140, md: 160 },
                         display: "flex",
+                        flexDirection: "column",
                         alignItems: "center",
-                        justifyContent: "center",
-                        transition: "transform 250ms ease",
+                        justifyContent: "flex-end",
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        position: "relative",
+                        backgroundColor: "var(--color-surface)",
+                        border: "1px solid var(--color-border)",
+                        backgroundImage: `linear-gradient(180deg, rgba(15, 23, 42, 0.05), rgba(15, 23, 42, 0.6)), url(${imageSource})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        boxShadow: isDark
+                          ? "0 10px 30px rgba(0,0,0,0.45)"
+                          : "0 12px 24px rgba(15,23,42,0.12)",
+                        transition: "transform 250ms ease, box-shadow 250ms ease",
+                        cursor: "pointer",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: isDark
+                            ? "0 18px 36px rgba(0,0,0,0.6)"
+                            : "0 18px 36px rgba(15,23,42,0.18)",
+                        },
                       }}
                     >
-                      <IconComponent
+                      <CardContent
                         sx={{
-                          fontSize: { xs: 28, md: 32 },
-                          color: category.color,
+                          width: "100%",
+                          p: { xs: 2, md: 2.5 },
+                          pt: { xs: 8, md: 9 },
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "flex-start",
+                          "&:last-child": { pb: { xs: 2, md: 2.5 } },
                         }}
-                      />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        textAlign: "center",
-                        fontWeight: 600,
-                        color: "var(--color-text)",
-                        fontSize: { xs: 12, sm: 13, md: 14 },
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {category.label}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Link>
-            </Box>
-          );
-        })}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 700,
+                            color: "#fff",
+                            textShadow: "0 4px 12px rgba(0,0,0,0.35)",
+                            letterSpacing: 0.5,
+                            fontSize: { xs: 14, md: 16 },
+                          }}
+                        >
+                          {category?.name ?? "Unnamed Category"}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </Box>
+              );
+            })}
       </Box>
+      {!isLoading && !error && categoriesToDisplay.length === 0 && (
+        <Typography
+          variant="body2"
+          sx={{ color: "var(--color-muted-text)", textAlign: "center", mt: 2 }}
+        >
+          No featured categories available right now. Please check back soon.
+        </Typography>
+      )}
     </Box>
   );
 }
