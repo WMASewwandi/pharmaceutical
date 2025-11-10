@@ -123,8 +123,8 @@ export default function FeaturedCategories() {
                     sm: "calc(33.333% - 13.33px)",
                     md: "calc(20% - 12px)",
                   },
-                  height: { xs: 140, md: 160 },
-                  borderRadius: 3,
+                  height: { xs: 170, md: 200 },
+                  borderRadius: 0,
                   border: "1px solid var(--color-border)",
                   background: "var(--color-surface)",
                   boxShadow: isDark
@@ -171,12 +171,12 @@ export default function FeaturedCategories() {
                   <Link href={linkHref} style={{ textDecoration: "none" }}>
                     <Card
                       sx={{
-                        height: { xs: 140, md: 160 },
+                        height: { xs: 170, md: 200 },
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        borderRadius: 3,
+                        borderRadius: 0,
                         overflow: "hidden",
                         position: "relative",
                         backgroundColor: "var(--color-surface)",

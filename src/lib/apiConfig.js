@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://localhost:44352/api/";
+export const API_BASE_URL = "https://posuat.openskylabz.com/api/";
 
 export const apiUrl = (path = "") => {
   if (!path) return API_BASE_URL;

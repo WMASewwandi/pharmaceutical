@@ -13,6 +13,12 @@ import {
   Typography,
   InputAdornment,
   Divider,
+  Grid,
+  Stack,
+  Checkbox,
+  FormControlLabel,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -30,11 +36,25 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState(null);
 
   const redirectTo = searchParams.get("redirect") || "/account";
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    if (!email || !email.includes("@")) {
+      setError("Enter a valid email address to continue.");
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setError("Your password must be at least 6 characters long.");
+      return;
+    }
+
     setLoading(true);
     
     // Simulate login process
@@ -57,29 +77,173 @@ function LoginForm() {
         justifyContent: "center",
       }}
     >
-      <Container maxWidth="sm">
+      <Container maxWidth="lg">
+        <Grid container spacing={{ xs: 6, md: 8 }} alignItems="stretch">
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                height: "100%",
+                borderRadius: 4,
+                overflow: "hidden",
+                position: "relative",
+                background: isDark
+                  ? "linear-gradient(135deg, rgba(3,7,18,0.92), rgba(8,33,60,0.85))"
+                  : "linear-gradient(135deg, rgba(224,244,255,0.95), rgba(235,249,255,0.8))",
+                border: "1px solid rgba(0,119,182,0.18)",
+                boxShadow: isDark
+                  ? "0 28px 50px rgba(6,24,44,0.55)"
+                  : "0 26px 50px rgba(15,23,42,0.15)",
+                p: { xs: 3, md: 5 },
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: { xs: 4, md: 6 },
+              }}
+            >
+              <Box>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    letterSpacing: 4,
+                    color: "var(--color-primary)",
+                    fontWeight: 700,
+                    mb: 2,
+                    display: "block",
+                  }}
+                >
+                  Opus Marketplace
+                </Typography>
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 800,
+                    color: "var(--color-text)",
+                    mb: 2,
+                    fontSize: { xs: 32, md: 38 },
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Designed to keep your wellness routine on track.
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: "var(--color-muted-text)",
+                    fontSize: { xs: 14, md: 15 },
+                    maxWidth: 440,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  Access tailored prescriptions, refill alerts, and curated lifestyle picks all in one place. Your
+                  secure dashboard remembers your preferences so you can focus on feeling your best.
+                </Typography>
+              </Box>
+
+              <Stack spacing={3}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      background: "var(--color-primary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 16,
+                      boxShadow: "0 10px 22px rgba(0,119,182,0.35)",
+                    }}
+                  >
+                    24/7
+                  </Box>
+                  <Typography sx={{ color: "var(--color-text)", fontWeight: 600, fontSize: 14 }}>
+                    Pharmacist-backed chat and phone support round the clock for urgent assistance.
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      background: "var(--color-secondary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--color-text)",
+                      fontWeight: 700,
+                      fontSize: 16,
+                      boxShadow: "0 10px 22px rgba(15,23,42,0.15)",
+                    }}
+                  >
+                    %
+                  </Box>
+                  <Typography sx={{ color: "var(--color-text)", fontWeight: 600, fontSize: 14 }}>
+                    Unlock bundles, loyalty credits, and personalized offers curated for you.
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      background: "rgba(34,197,94,0.16)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "rgb(20,155,68)",
+                      fontWeight: 700,
+                      fontSize: 16,
+                    }}
+                  >
+                    ★
+                  </Box>
+                  <Typography sx={{ color: "var(--color-text)", fontWeight: 600, fontSize: 14 }}>
+                    Manage scripts, reorder favorites, and sync prescriptions effortlessly.
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
         <Card
           sx={{
-            background: "var(--color-surface)",
+                borderRadius: 4,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
             border: "1px solid var(--color-border)",
-            borderRadius: 3,
-            boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : "0 4px 20px rgba(0,0,0,0.08)",
-            overflow: "hidden",
-          }}
-        >
-          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-            {/* Header */}
-            <Box sx={{ textAlign: "center", mb: 4 }}>
+                boxShadow: isDark
+                  ? "0 24px 44px rgba(0,0,0,0.45)"
+                  : "0 20px 44px rgba(15,23,42,0.16)",
+              }}
+            >
+              <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+                <Box
+                  component="form"
+                  onSubmit={handleLogin}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2.5,
+                  }}
+                >
+                  <Box sx={{ textAlign: "center" }}>
               <Typography
-                variant="h4"
+                      variant="h5"
                 sx={{
                   fontWeight: 700,
                   color: "var(--color-text)",
-                  mb: 1,
-                  fontSize: { xs: 24, md: 28 },
+                        mb: 0.5,
+                        fontSize: { xs: 20, md: 22 },
                 }}
               >
-                Sign In
+                      Sign in to continue
               </Typography>
               <Typography
                 variant="body2"
@@ -88,14 +252,17 @@ function LoginForm() {
                   fontSize: { xs: 13, md: 14 },
                 }}
               >
-                Sign in to your account to continue
+                      Secure access to your prescriptions, favorites, and order history.
               </Typography>
             </Box>
 
-            {/* Login Form */}
-            <Box component="form" onSubmit={handleLogin}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-                {/* Email Field */}
+                  {error && (
+                    <Alert severity="error" sx={{ borderRadius: 2 }}>
+                      {error}
+                    </Alert>
+                  )}
+
+                  <Stack spacing={2}>
                 <TextField
                   fullWidth
                   type="email"
@@ -132,7 +299,6 @@ function LoginForm() {
                   }}
                 />
 
-                {/* Password Field */}
                 <TextField
                   fullWidth
                   type={showPassword ? "text" : "password"}
@@ -191,22 +357,40 @@ function LoginForm() {
                   }}
                 />
 
-                {/* Forgot Password Link */}
-                <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            sx={{
+                              color: "var(--color-border)",
+                              "&.Mui-checked": { color: "var(--color-primary)" },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography sx={{ fontSize: 13, color: "var(--color-muted-text)" }}>
+                            Remember me
+                          </Typography>
+                        }
+                      />
+
                   <Link
                     href="/forgot-password"
                     style={{
                       fontSize: "13px",
                       color: "var(--color-primary)",
                       textDecoration: "none",
-                      fontWeight: 500,
+                          fontWeight: 600,
                     }}
                   >
-                    Forgot Password?
+                        Forgot password?
                   </Link>
-                </Box>
+                    </Stack>
+                  </Stack>
 
-                {/* Login Button */}
                 <Button
                   type="submit"
                   variant="contained"
@@ -218,7 +402,7 @@ function LoginForm() {
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: { xs: 15, md: 16 },
-                    py: { xs: 1.5, md: 1.75 },
+                      py: { xs: 1.4, md: 1.5 },
                     borderRadius: 2,
                     boxShadow: "0 4px 12px rgba(0, 119, 182, 0.3)",
                     "&:hover": {
@@ -231,30 +415,75 @@ function LoginForm() {
                       color: "var(--color-muted-text)",
                     },
                     transition: "all 250ms ease",
-                    mt: 2,
-                  }}
-                >
-                  {loading ? "Signing In..." : "Sign In"}
+                    }}
+                  >
+                    {loading ? (
+                      <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+                        <CircularProgress size={18} thickness={5} sx={{ color: "white" }} />
+                        <span>Signing in...</span>
+                      </Stack>
+                    ) : (
+                      "Sign In"
+                    )}
                 </Button>
-              </Box>
-            </Box>
 
-            {/* Divider */}
-            <Divider sx={{ my: 3, borderColor: "var(--color-border)" }}>
+                  <Divider sx={{ my: 1 }}>
               <Typography
                 variant="body2"
                 sx={{
                   color: "var(--color-muted-text)",
-                  px: 2,
+                        px: 1.5,
                   fontSize: 12,
+                        textTransform: "uppercase",
+                        letterSpacing: 1.2,
                 }}
               >
-                OR
+                      or continue with
               </Typography>
             </Divider>
 
-            {/* Sign Up Link */}
-            <Box sx={{ textAlign: "center" }}>
+                  <Stack spacing={1}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 600,
+                        py: 1,
+                        borderColor: "var(--color-border)",
+                        color: "var(--color-text)",
+                        "&:hover": {
+                          borderColor: "var(--color-primary)",
+                          color: "var(--color-primary)",
+                          background: "var(--color-primary)08",
+                        },
+                      }}
+                    >
+                      Continue with Google
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 600,
+                        py: 1,
+                        borderColor: "var(--color-border)",
+                        color: "var(--color-text)",
+                        "&:hover": {
+                          borderColor: "var(--color-primary)",
+                          color: "var(--color-primary)",
+                          background: "var(--color-primary)08",
+                        },
+                      }}
+                    >
+                      Continue with Microsoft
+                    </Button>
+                  </Stack>
+
+                  <Box sx={{ textAlign: "center", mt: 1 }}>
               <Typography
                 variant="body2"
                 sx={{
@@ -262,21 +491,70 @@ function LoginForm() {
                   fontSize: { xs: 13, md: 14 },
                 }}
               >
-                Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                 <Link
                   href={`/signup${redirectTo !== "/account" ? `?redirect=${redirectTo}` : ""}`}
                   style={{
                     color: "var(--color-primary)",
                     textDecoration: "none",
-                    fontWeight: 600,
+                        fontWeight: 700,
+                      }}
+                    >
+                      Create one now
+                    </Link>
+                  </Typography>
+                  </Box>
+                </Box>
+
+            {/* Divider */}
+            <Divider sx={{ my: 3, borderColor: "var(--color-border)" }} />
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    background: "var(--color-background)",
+                    borderRadius: 2,
+                    p: 2,
+                    height: "100%",
+                    border: "1px solid var(--color-border)",
                   }}
                 >
-                  Sign Up
-                </Link>
-              </Typography>
-            </Box>
+                  <Typography sx={{ fontWeight: 700, color: "var(--color-text)", mb: 0.5, fontSize: 14 }}>
+                    Need help?
+                  </Typography>
+                  <Typography sx={{ color: "var(--color-muted-text)", fontSize: 12, lineHeight: 1.5 }}>
+                    Our care team is on standby.{" "}
+                    <Link href="tel:+940773771726" style={{ color: "var(--color-primary)", textDecoration: "none" }}>
+                      Call or chat with us
+                    </Link>{" "}
+                    for any assistance with your account.
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    background: "var(--color-background)",
+                    borderRadius: 2,
+                    p: 2,
+                    height: "100%",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 700, color: "var(--color-text)", mb: 0.5, fontSize: 14 }}>
+                    New to Opus?
+                  </Typography>
+                  <Typography sx={{ color: "var(--color-muted-text)", fontSize: 12, lineHeight: 1.5 }}>
+                    Track prescriptions, refill in seconds, and earn loyalty rewards on every purchase.
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
+      </Grid>
+    </Grid>
       </Container>
     </Box>
   );

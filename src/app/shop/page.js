@@ -858,7 +858,7 @@ export default function ShopPage() {
                             "&:hover": { bgcolor: "var(--color-secondary)" },
                           }}
                         >
-                          {product.inStock ? "Add to bag" : "Out of stock"}
+                          {product.inStock ? "Add to cart" : "Out of stock"}
                     </Button>
                     );
                   })()}

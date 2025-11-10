@@ -1,10 +1,10 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { Box, Typography, Button } from "@mui/material";
+import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
 
 export default function UploadPrescription() {
   return (
@@ -72,9 +72,9 @@ export default function UploadPrescription() {
               mb: 2,
             }}
           >
-            <DescriptionIcon
+            <ShoppingCartCheckoutIcon
               sx={{
-                fontSize: { xs: 40, md: 50 },
+                fontSize: { xs: 42, md: 52 },
                 color: "white",
               }}
             />
@@ -94,7 +94,7 @@ export default function UploadPrescription() {
                 backgroundClip: "text",
               }}
             >
-              Need a Doctor-Prescribed Medicine?
+              Need A Personal Shopping Assistant?
             </Typography>
             <Typography
               variant="body1"
@@ -106,16 +106,15 @@ export default function UploadPrescription() {
                 mb: 1,
               }}
             >
-              Upload your valid prescription & we'll deliver securely to your door.
+              Tell us what you’re hunting for and our concierge team will curate the best deals, drops, and bundles for you—in minutes.
             </Typography>
           </Box>
-          <Box
-            component="label"
-            htmlFor="prescription-upload"
+          <Button
+            href="/concierge"
             sx={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 1,
+              gap: 1.5,
               bgcolor: "var(--color-primary)",
               color: "white",
               textTransform: "none",
@@ -149,22 +148,9 @@ export default function UploadPrescription() {
               transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <CloudUploadIcon sx={{ fontSize: 22 }} />
-            <span>Upload Prescription</span>
-            <input
-              type="file"
-              id="prescription-upload"
-              accept="image/*,.pdf"
-              style={{
-                position: "absolute",
-                opacity: 0,
-                width: 0,
-                height: 0,
-                overflow: "hidden",
-                pointerEvents: "none",
-              }}
-            />
-          </Box>
+            <ShoppingCartCheckoutIcon sx={{ fontSize: 22 }} />
+            <span>Start A Concierge Request</span>
+          </Button>
         </Box>
 
         {/* Feature icons row */}
@@ -179,128 +165,79 @@ export default function UploadPrescription() {
             borderTop: "1px solid var(--color-border)",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-              flex: { xs: "1 1 100%", sm: "0 0 auto" },
-            }}
-          >
-            <Box
-              sx={{
-                width: { xs: 56, md: 64 },
-                height: { xs: 56, md: 64 },
-                borderRadius: "50%",
-                background: `linear-gradient(135deg, var(--color-primary)20, var(--color-primary)05)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid var(--color-primary)",
-              }}
-            >
-              <DescriptionIcon
+          {[
+            {
+              icon: SupportAgentIcon,
+              title: "Dedicated Stylists",
+              description: "Real humans scouting trending products that match your vibe & budget.",
+            },
+            {
+              icon: Inventory2Icon,
+              title: "Curated Drops",
+              description: "Hand-picked bundles and limited releases sourced from top global sellers.",
+            },
+            {
+              icon: ShoppingCartCheckoutIcon,
+              title: "Seamless Checkout",
+              description: "One consolidated cart with tracked shipping from multiple brands.",
+            },
+            {
+              icon: CreditScoreIcon,
+              title: "Flexible Payments",
+              description: "Buy now, pay later, split payments, or use your favourite wallet in seconds.",
+            },
+          ].map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Box
+                key={feature.title}
                 sx={{
-                  fontSize: { xs: 28, md: 32 },
-                  color: "var(--color-primary)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 1,
+                  flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                  maxWidth: 240,
                 }}
-              />
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "var(--color-text)",
-                fontWeight: 600,
-                fontSize: { xs: 12, md: 14 },
-                textAlign: "center",
-              }}
-            >
-              Easy Upload
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-              flex: { xs: "1 1 100%", sm: "0 0 auto" },
-            }}
-          >
-            <Box
-              sx={{
-                width: { xs: 56, md: 64 },
-                height: { xs: 56, md: 64 },
-                borderRadius: "50%",
-                background: `linear-gradient(135deg, var(--color-secondary)20, var(--color-secondary)05)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid var(--color-secondary)",
-              }}
-            >
-              <VerifiedUserIcon
-                sx={{
-                  fontSize: { xs: 28, md: 32 },
-                  color: "var(--color-secondary)",
-                }}
-              />
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "var(--color-text)",
-                fontWeight: 600,
-                fontSize: { xs: 12, md: 14 },
-                textAlign: "center",
-              }}
-            >
-              Verified & Secure
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-              flex: { xs: "1 1 100%", sm: "0 0 auto" },
-            }}
-          >
-            <Box
-              sx={{
-                width: { xs: 56, md: 64 },
-                height: { xs: 56, md: 64 },
-                borderRadius: "50%",
-                background: `linear-gradient(135deg, var(--color-accent)20, var(--color-accent)05)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid var(--color-accent)",
-              }}
-            >
-              <LocalShippingIcon
-                sx={{
-                  fontSize: { xs: 28, md: 32 },
-                  color: "var(--color-accent)",
-                }}
-              />
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "var(--color-text)",
-                fontWeight: 600,
-                fontSize: { xs: 12, md: 14 },
-                textAlign: "center",
-              }}
-            >
-              Fast Delivery
-            </Typography>
-          </Box>
+              >
+                <Box
+                  sx={{
+                    width: { xs: 56, md: 64 },
+                    height: { xs: 56, md: 64 },
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg, var(--color-primary)20, var(--color-primary)05)`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px solid var(--color-primary)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  <Icon sx={{ fontSize: { xs: 30, md: 34 } }} />
+                </Box>
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    color: "var(--color-text)",
+                    fontSize: { xs: 14, md: 16 },
+                    textAlign: "center",
+                  }}
+                >
+                  {feature.title}
+                </Typography>
+                <Typography
+                  sx={{
+                    color: "var(--color-muted-text)",
+                    fontSize: { xs: 12, md: 13 },
+                    textAlign: "center",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {feature.description}
+                </Typography>
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Box>

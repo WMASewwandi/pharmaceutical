@@ -1,14 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
 :root {
   /* Brand palette (light) */
-  --color-primary: #0077B6; /* Deep Medical Blue */
-  --color-secondary: #00B4D8; /* Aqua Blue */
-  --color-accent: #90E0EF; /* Soft Cyan */
+  --color-primary: #37353E; /* Rich Charcoal */
+  --color-secondary: #1F1E24; /* Deep Slate */
+  --color-accent: #F4F4F6; /* Soft Off-White */
   --color-primary-contrast: #ffffff;
-  --color-text: #1E293B; /* Charcoal Navy */
-  --color-muted-text: #475569; /* Slate 600 */
-  --color-border: #E2E8F0; /* Slate 200 */
-  --color-surface: #FFFFFF;
-  --color-background: #F8FAFC; /* Near-White */
+  --color-text: #37353E; /* Charcoal */
+  --color-muted-text: #61606A; /* Muted Slate */
+  --color-border: #E2E1E9; /* Light Slate */
+  --color-surface: #ffffff;
+  --color-background: #ffffff;
   --header-offset: 120px;
 
   /* Semantics */
@@ -26,11 +28,11 @@
 
 /* Dark theme variant driven by [data-theme="dark"] */
 [data-theme="dark"] {
-  --color-background: #0b1220;
-  --color-text: #e6edf6;
-  --color-muted-text: #b6c2d6;
-  --color-surface: #111827;
-  --color-border: #243041;
+  --color-background: #1B2114;
+  --color-text: #E7ECD9;
+  --color-muted-text: #B5C0A1;
+  --color-surface: #232A18;
+  --color-border: #3A4326;
   --background: var(--color-background);
   --foreground: var(--color-text);
 }
@@ -44,7 +46,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary), var(--font-roboto), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -52,6 +54,12 @@ body {
 main {
   width: 100%;
   margin: 0;
+}
+
+@media (max-width: 900px) {
+  main {
+    padding-bottom: 72px;
+  }
 }
 
 .with-header-offset {

@@ -15,7 +15,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useTheme } from "../../components/ThemeProvider";
@@ -94,10 +94,10 @@ export default function CartPage() {
                   fontSize: { xs: 24, md: 32 },
                 }}
               >
-                Shopping Bag
+                Shopping Cart
               </Typography>
               <Typography variant="body1" sx={{ color: "var(--color-muted-text)", fontSize: { xs: 14, md: 16 } }}>
-                {items.length} item{items.length !== 1 ? "s" : ""} in your bag
+                {items.length} item{items.length !== 1 ? "s" : ""} in your cart
               </Typography>
             </Box>
           </Box>
@@ -124,7 +124,7 @@ export default function CartPage() {
                 mb: 4,
               }}
             >
-              <ShoppingBagIcon
+              <ShoppingCartIcon
                 sx={{
                   fontSize: { xs: 64, md: 80 },
                   color: "var(--color-primary)",
@@ -141,7 +141,7 @@ export default function CartPage() {
                 fontSize: { xs: 22, md: 28 },
               }}
             >
-              Your bag is empty
+              Your cart is empty
             </Typography>
             <Typography
               variant="body1"
@@ -153,7 +153,7 @@ export default function CartPage() {
                 margin: "0 auto",
               }}
             >
-              Start shopping to add items to your bag and checkout when you're ready.
+              Start shopping to add items to your cart and checkout when you're ready.
             </Typography>
             <Button
               component={Link}

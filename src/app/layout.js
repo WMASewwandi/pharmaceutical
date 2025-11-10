@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Roboto } from "next/font/google";
+import { Geist, Geist_Mono, Roboto, Montserrat } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "../components/ThemeProvider";
 import SiteHeader from "../components/SiteHeader";
@@ -24,6 +24,12 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
+const montserrat = Montserrat({
+  variable: "--font-primary",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata = {
   title: "Company | Pharmaceutical E‑commerce",
   description: "Trusted online pharmacy with curated healthcare products",
@@ -32,7 +38,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} ${montserrat.variable}`}>
         <ThemeProvider>
           <CartProvider>
             <CssBaseline />

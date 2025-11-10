@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import ThemeToggle from "./ThemeToggle";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import PhoneEnabledIcon from "@mui/icons-material/PhoneEnabled";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, IconButton, Box, Typography } from "@mui/material";
+import { Button, IconButton, Box, Typography, Drawer, List, ListItemButton, ListItemText } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -38,18 +40,25 @@ export default function SiteHeader() {
   }, []);
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
-    { href: "/about", label: "About Us" },
-    { href: "/contact", label: "Contact Us" },
+    { href: "/", label: "HOME" },
+    { href: "/shop", label: "SHOP" },
+    { href: "/categories", label: "CATEGORIES" },
+    { href: "/deals", label: "DEALS" },
+    { href: "/new-arrivals", label: "NEW ARRIVALS" },
+    { href: "/best-sellers", label: "BEST SELLERS" },
+    { href: "/about", label: "ABOUT US" },
+    { href: "/contact", label: "CONTACT US" },
   ];
 
   const ctaLinks = [
-    { href: "/orders-tracking", label: "Orders Tracking" },
+    { href: "/account", label: "My Account" },
+    { href: "/cart", label: "View Cart" },
+    { href: "/checkout", label: "Checkout" },
   ];
 
   return (
-    <header style={{
+    <>
+      <header style={{
       position: "fixed",
       top: 0,
       left: 0,
@@ -61,40 +70,6 @@ export default function SiteHeader() {
       backdropFilter: shouldShowBackground ? "saturate(180%) blur(6px)" : "none",
       transition: "background 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
     }}>
-      {/* Top helpline & social bar */}
-      <Box
-        sx={{
-        background: "var(--color-surface)",
-          color: "var(--color-text-muted, var(--color-text))",
-        borderBottom: "1px solid var(--color-border)",
-        fontSize: 12,
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: '85vw',
-          margin: "0 auto",
-            px: { xs: 2, md: 4 },
-            py: 0.5,
-          display: "flex",
-          alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
-            <PhoneEnabledIcon sx={{ fontSize: 16 }} />
-            <a
-              href={`tel:${helpline.replace(/[^+\d]/g, "")}`}
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
-              Customer care {helpline}
-            </a>
-          </Box>
-        </Box>
-      </Box>
-
       {/* Main header */}
       <Box
         sx={{
@@ -104,34 +79,42 @@ export default function SiteHeader() {
       >
         <Box
           sx={{
-            maxWidth: '85vw',
-        margin: "0 auto",
+            maxWidth: "100%",
+            margin: "0 auto",
             px: { xs: 2, md: 4 },
             py: { xs: 2, md: 3 },
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: { xs: "nowrap", md: "wrap" },
             gap: { xs: 2, md: 4 },
           }}
         >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
           <Link 
             href="/" 
             style={{ textDecoration: "none", color: "inherit", flexShrink: 0 }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: { xs: 0, md: 2 },
+                  }}
+                >
               <Box
                 component="img"
                 src="/images/logo.png"
                 alt="Opus Marketplace logo"
                 sx={{
-                  width: 80,
-                  height: 80,
+                      width: { xs: 56, md: 80 },
+                      height: { xs: 56, md: 80 },
                   objectFit: "contain",
                   flexShrink: 0,
                 }}
               />
-              <Box sx={{ lineHeight: 1.1 }}>
+                  <Box sx={{ lineHeight: 1.1, display: { xs: "none", md: "block" } }}>
                 <Typography component="span" sx={{ fontWeight: 700, fontSize: 20 }}>
                   Opus Marketplace
                 </Typography>
@@ -141,238 +124,257 @@ export default function SiteHeader() {
                 <Typography component="span" sx={{ display: "block", fontSize: 11, color: "var(--color-text-muted, #8f8f8f)", mt: 0.5 }}>
                   Since 2025
                 </Typography>
-              </Box>
+                  </Box>
+                </Box>
+              </Link>
             </Box>
-          </Link>
+          </Box>
 
           <Box
-                    sx={{
+            sx={{
               display: "flex",
-              alignItems: "center",
-              gap: 1.5,
+              flexDirection: { xs: "row", md: "column" },
+              alignItems: { xs: "center", md: "flex-end" },
+              justifyContent: { xs: "space-between", md: "flex-start" },
+              gap: { xs: 0, md: 2 },
               order: { xs: 2, md: 2 },
+              alignSelf: { xs: "center", md: "auto" },
+              width: { xs: "auto", md: "auto" },
             }}
           >
-            {!isMobile && <ThemeToggle />}
-
-            <IconButton
-              component={Link}
-              href="/account"
-              aria-label="Account"
+            <Box
               sx={{
-                border: "1px solid var(--color-border)",
-                color: "inherit",
-                width: 38,
-                height: 38,
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                gap: 1.5,
               }}
-              size="small"
             >
-              <AccountCircleIcon fontSize="small" />
-            </IconButton>
-
-            <IconButton
-              component={Link}
-              href="/cart"
-              aria-label="Cart"
-              sx={{
-                border: "1px solid var(--color-border)",
-                color: "inherit",
-                width: 38,
-                height: 38,
-              }}
-              size="small"
-            >
-              <Badge badgeContent={cartCount} color="primary" showZero>
-                <ShoppingBagIcon fontSize="small" />
-              </Badge>
-            </IconButton>
-
-            {isMobile && (
-            <IconButton
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                onClick={() => setMenuOpen((v) => !v)}
-              sx={{
-                border: "1px solid var(--color-border)",
-                color: "inherit",
+              <IconButton
+                component={Link}
+                href="/account"
+                aria-label="Account"
+                sx={{
+                  color: "inherit",
                   width: 38,
                   height: 38,
+                }}
+                size="small"
+              >
+                <AccountCircleOutlinedIcon fontSize="small" />
+              </IconButton>
+
+              <IconButton
+                component={Link}
+                href="/cart"
+                aria-label="Cart"
+                sx={{
+                  color: "inherit",
+                  width: 38,
+                  height: 38,
+                }}
+                size="small"
+              >
+                <Badge
+                  badgeContent={cartCount}
+                  color="secondary"
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      backgroundColor: 'var(--color-text)',
+                      color: 'var(--color-primary-contrast)',
+                    },
+                  }}
+                  showZero
+                >
+                  <ShoppingCartOutlinedIcon fontSize="small" />
+                </Badge>
+              </IconButton>
+            </Box>
+
+            <IconButton
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMenuOpen((v) => !v)}
+              sx={{
+                color: "inherit",
+                width: 38,
+                height: 38,
+                marginLeft: "auto",
+                display: { xs: "flex", md: "none" },
+                alignItems: "center",
+                justifyContent: "center",
               }}
               size="small"
             >
-                {menuOpen ? <CloseIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
+              {menuOpen ? <CloseIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
             </IconButton>
-          )}
+
+            <Box
+              component="nav"
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                gap: 1.5,
+              }}
+            >
+              {navLinks.map((link) => {
+                const isActive = pathname === (link.match ?? link.href);
+                return (
+                  <Button
+                    key={link.href}
+                    component={Link}
+                    href={link.href}
+                    disableRipple
+                    sx={{
+                      position: "relative",
+                      color: isActive ? "var(--color-primary)" : "inherit",
+                      textTransform: "none",
+                      fontWeight: 500,
+                      fontSize: 15,
+                      px: 1,
+                      '&::after': {
+                        content: '""',
+                        position: "absolute",
+                        left: 8,
+                        right: 8,
+                        bottom: 4,
+                        height: 2,
+                        borderRadius: 999,
+                        background: "var(--color-primary)",
+                        opacity: isActive ? 1 : 0,
+                        transform: isActive ? "scaleX(1)" : "scaleX(0.5)",
+                        transition: "opacity 200ms ease, transform 200ms ease",
+                      },
+                      '&:hover': {
+                        color: "var(--color-primary)",
+                        '&::after': { opacity: 1, transform: "scaleX(1)" },
+                      },
+                    }}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              })}
+            </Box>
           </Box>
         </Box>
       </Box>
 
-      {/* Navigation row */}
-      <Box
-        sx={{
-          background: "var(--color-surface)",
-          borderTop: "1px solid var(--color-border)",
-          borderBottom: "1px solid var(--color-border)",
-          display: isMobile ? "none" : "block",
+
+      <Drawer
+        anchor="left"
+        open={isMobile && menuOpen}
+        onClose={() => setMenuOpen(false)}
+        PaperProps={{
+          sx: {
+            width: "80vw",
+            maxWidth: 320,
+            background: "var(--color-background)",
+          },
+        }}
+        ModalProps={{
+          keepMounted: true,
         }}
       >
         <Box
           sx={{
-            maxWidth: '85vw',
-            margin: "0 auto",
-            px: { xs: 2, md: 4 },
-            py: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 3,
+            px: 2,
+            py: 1.5,
+            borderBottom: "1px solid var(--color-border)",
           }}
         >
-          <Box component="nav" sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {navLinks.map((link) => {
-              const isActive = pathname === (link.match ?? link.href);
-              return (
-                <Button
-                  key={link.href}
-                  component={Link}
-                  href={link.href}
-                  disableRipple
-                  sx={{
-                    position: "relative",
-                    color: isActive ? "var(--color-primary)" : "inherit",
-                    textTransform: "none",
-                    fontWeight: 500,
-                    fontSize: 15,
-                    px: 1,
-                    '&::after': {
-                      content: '""',
-                      position: "absolute",
-                      left: 8,
-                      right: 8,
-                      bottom: 4,
-                      height: 2,
-                      borderRadius: 999,
-                      background: "var(--color-primary)",
-                      opacity: isActive ? 1 : 0,
-                      transform: isActive ? "scaleX(1)" : "scaleX(0.5)",
-                      transition: "opacity 200ms ease, transform 200ms ease",
-                    },
-                    '&:hover': {
-                      color: "var(--color-primary)",
-                      '&::after': { opacity: 1, transform: "scaleX(1)" },
-                    },
-                  }}
-                >
-                  {link.label}
-                </Button>
-              );
-            })}
-          </Box>
+          <Typography sx={{ fontWeight: 600, fontSize: 16 }}>Menu</Typography>
+          <IconButton
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+            size="small"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            {ctaLinks.map((cta) => (
-              <Button
-                key={cta.href}
+        <List>
+          {navLinks.map((link) => {
+            const isActive = pathname === (link.match ?? link.href);
+            return (
+              <ListItemButton
+                key={link.href}
                 component={Link}
-                href={cta.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
                 sx={{
-                  background: "var(--color-primary)",
-                  color: "var(--color-primary-contrast)",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 2.5,
-                  py: 1,
-                  borderRadius: 2,
-                  boxShadow: "0 10px 20px rgba(0, 119, 182, 0.24)",
-                  border: "1px solid transparent",
-                  '&:hover': {
-                    background: "var(--color-secondary)",
-                    boxShadow: "0 12px 24px rgba(0, 180, 216, 0.28)",
-                  },
+                  color: isActive ? "var(--color-primary)" : "inherit",
                 }}
               >
-                {cta.label}
-              </Button>
-            ))}
-          </Box>
-        </Box>
-      </Box>
-
-      {isMobile && menuOpen && (
-        <Box
-          sx={{
-          position: "absolute",
-          top: "100%",
-            left: 0,
-            right: 0,
-          background: "var(--color-background)",
-            borderTop: "1px solid var(--color-border)",
-            boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
-          zIndex: 60,
-          }}
-        >
-          <Box
-            sx={{
-              px: 2,
-              py: 2,
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            {navLinks.map((link) => {
-              const isActive = pathname === (link.match ?? link.href);
-              return (
-                <Button
-                  key={link.href}
-                  component={Link}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  sx={{
-                    justifyContent: "flex-start",
-                    color: isActive ? "var(--color-primary)" : "inherit",
-                    textTransform: "none",
+                <ListItemText
+                  primary={link.label}
+                  primaryTypographyProps={{
                     fontSize: 16,
-                    py: 1.25,
+                    fontWeight: 500,
                   }}
-                >
-                  {link.label}
-                </Button>
-              );
-            })}
+                />
+              </ListItemButton>
+            );
+          })}
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 2 }}>
-              {ctaLinks.map((cta) => (
-                <Button
-                  key={cta.href}
-                  component={Link}
-                  href={cta.href}
-                  onClick={() => setMenuOpen(false)}
-                  sx={{
-                    background: "var(--color-primary)",
-                    color: "var(--color-primary-contrast)",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderRadius: 1.5,
-                    py: 1.25,
-                    boxShadow: "0 10px 20px rgba(0, 119, 182, 0.24)",
-                    border: "1px solid transparent",
-                    '&:hover': {
-                      background: "var(--color-secondary)",
-                    },
-                  }}
-                >
-                  {cta.label}
-                </Button>
-              ))}
-            </Box>
+          {ctaLinks.map((cta) => (
+            <ListItemButton
+              key={cta.href}
+              component={Link}
+              href={cta.href}
+              onClick={() => setMenuOpen(false)}
+            >
+              <ListItemText
+                primary={cta.label}
+                primaryTypographyProps={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: "var(--color-primary)",
+                }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
 
-            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-              <ThemeToggle />
-            </Box>
-          </Box>
-        </Box>
-      )}
     </header>
+
+    {isMobile && (
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: "var(--color-surface)",
+          borderTop: "1px solid var(--color-border)",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          py: 1,
+          px: 2,
+          zIndex: 120,
+        }}
+      >
+        <IconButton component={Link} href="/" aria-label="Home" sx={{ color: "inherit" }}>
+          <HomeOutlinedIcon />
+        </IconButton>
+        <IconButton component={Link} href="/shop" aria-label="Shop" sx={{ color: "inherit" }}>
+          <StorefrontOutlinedIcon />
+        </IconButton>
+        <IconButton component={Link} href="/search" aria-label="Search" sx={{ color: "inherit" }}>
+          <SearchOutlinedIcon />
+        </IconButton>
+        <IconButton component={Link} href="/cart" aria-label="Cart" sx={{ color: "inherit" }}>
+          <ShoppingCartOutlinedIcon />
+        </IconButton>
+        <IconButton component={Link} href="/account" aria-label="Account" sx={{ color: "inherit" }}>
+          <PersonOutlinedIcon />
+        </IconButton>
+      </Box>
+    )}
+    </>
   );
 }
 

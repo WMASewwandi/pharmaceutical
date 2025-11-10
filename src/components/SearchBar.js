@@ -14,7 +14,7 @@ const sampleProducts = [
   "Coffee Grinder",
   "Laptop Sleeve",
   "Scented Candles",
-  "Crossbody Bag",
+  "Smart Cart",
   "Gaming Mouse",
   "Bluetooth Speaker",
 ];

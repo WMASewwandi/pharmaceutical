@@ -79,7 +79,7 @@ export default function FeaturedProducts() {
     [products]
   );
 
-  const handleAddToBag = (product) => {
+  const handleAddToCart = (product) => {
     addItem(
       {
         id: product.id,
@@ -325,7 +325,7 @@ export default function FeaturedProducts() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleAddToBag(product);
+                            handleAddToCart(product);
                           }}
                           sx={{
                             bgcolor: "var(--color-primary)",
@@ -339,7 +339,7 @@ export default function FeaturedProducts() {
                             },
                           }}
                         >
-                          Add to Bag
+                          Add to Cart
                         </Button>
                       );
                     })()}
