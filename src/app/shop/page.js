@@ -714,16 +714,29 @@ export default function ShopPage() {
                   },
                 }}
               >
-                <Box sx={{ position: "relative" }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    background: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: { xs: 240, md: 260 },
+                    overflow: "hidden",
+                  }}
+                >
                   <CardMedia
                     component="img"
-                      height="200"
                     image={product.image}
                     alt={product.name}
                     onError={(e) => {
                       e.target.src = "/images/no-image.jpg";
                     }}
-                      sx={{ objectFit: "cover" }}
+                    sx={{
+                      height: "100%",
+                      width: "100%",
+                      objectFit: "contain",
+                    }}
                   />
                   {!product.inStock && (
                       <Chip

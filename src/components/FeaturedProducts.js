@@ -191,16 +191,18 @@ export default function FeaturedProducts() {
               }}
             >
               <Box
-                sx={{
-                  width: "100%",
-                  height: { xs: 140, md: 160 },
-                  background: "var(--color-surface)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  position: "relative",
-                }}
+                sx={
+                  {
+                    width: "100%",
+                    height: { xs: 200, md: 220 },
+                    background: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                    position: "relative",
+                  }
+                }
               >
                     <Link
                       href={`/shop?product=${product.id}`}
@@ -215,7 +217,8 @@ export default function FeaturedProducts() {
                         style={{
                           width: "100%",
                           height: "100%",
-                          objectFit: "cover",
+                          objectFit: "contain",
+                          padding: 12,
                         }}
                       />
                     </Link>
