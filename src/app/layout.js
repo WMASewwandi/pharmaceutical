@@ -1,9 +1,11 @@
-import { Geist, Geist_Mono, Roboto } from "next/font/google";
+import { Geist, Geist_Mono, Roboto, Montserrat } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "../components/ThemeProvider";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import CssBaseline from "@mui/material/CssBaseline";
+import AppMain from "../components/AppMain";
+import { CartProvider } from "../context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +24,12 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
+const montserrat = Montserrat({
+  variable: "--font-primary",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata = {
   title: "Company | Pharmaceutical E‑commerce",
   description: "Trusted online pharmacy with curated healthcare products",
@@ -30,14 +38,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} ${montserrat.variable}`}>
         <ThemeProvider>
-          <CssBaseline />
-          <SiteHeader />
-          <main style={{ width: "100%", margin: 0, padding: 0 }}>
-            {children}
-          </main>
-          <SiteFooter />
+          <CartProvider>
+            <CssBaseline />
+            <SiteHeader />
+            <AppMain>{children}</AppMain>
+            <SiteFooter />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

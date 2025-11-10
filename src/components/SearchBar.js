@@ -6,17 +6,17 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState } from "react";
 
-const sampleMedicines = [
-  "Paracetamol",
-  "Ibuprofen",
-  "Amoxicillin",
-  "Cetirizine",
-  "Omeprazole",
-  "Metformin",
-  "Atorvastatin",
-  "Azithromycin",
-  "Vitamin C",
-  "Zinc",
+const sampleProducts = [
+  "Wireless Earbuds",
+  "Smartwatch",
+  "Yoga Mat",
+  "Sneakers",
+  "Coffee Grinder",
+  "Laptop Sleeve",
+  "Scented Candles",
+  "Smart Cart",
+  "Gaming Mouse",
+  "Bluetooth Speaker",
 ];
 
 export default function SearchBar({ fullWidth = true }) {
@@ -26,7 +26,7 @@ export default function SearchBar({ fullWidth = true }) {
   return (
     <Autocomplete
       freeSolo
-      options={sampleMedicines}
+      options={sampleProducts}
       value={value}
       onChange={(e, newValue) => setValue(newValue)}
       inputValue={inputValue}
@@ -35,7 +35,7 @@ export default function SearchBar({ fullWidth = true }) {
       renderInput={(params) => (
         <TextField
           {...params}
-          placeholder="Search medicines, brands..."
+          placeholder="Search products, brands..."
           size="small"
           InputProps={{
             ...params.InputProps,

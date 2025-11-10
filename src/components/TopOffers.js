@@ -11,48 +11,48 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 const offers = [
   {
     id: 1,
-    title: "Vitamin D3 Supplements",
-    discount: "30% OFF",
-    originalPrice: 2999,
-    salePrice: 2099,
+    title: "Wireless Noise-Cancelling Headphones",
+    discount: "32% OFF",
+    originalPrice: 45999,
+    salePrice: 31279,
     image: "/images/no-image.jpg",
-    href: "/shop/vitamin-d3",
+    href: "/shop/wireless-headphones",
   },
   {
     id: 2,
-    title: "Multivitamin Bundle",
+    title: "Smart Home Starter Kit",
     discount: "25% OFF",
-    originalPrice: 4500,
-    salePrice: 3375,
+    originalPrice: 29999,
+    salePrice: 22499,
     image: "/images/no-image.jpg",
-    href: "/shop/multivitamin-bundle",
+    href: "/shop/smart-home-starter",
   },
   {
     id: 3,
-    title: "Omega-3 Fish Oil",
-    discount: "20% OFF",
-    originalPrice: 3500,
-    salePrice: 2800,
+    title: "Designer Sneaker Duo",
+    discount: "30% OFF",
+    originalPrice: 19999,
+    salePrice: 13999,
     image: "/images/no-image.jpg",
-    href: "/shop/omega-3",
+    href: "/shop/designer-sneaker-duo",
   },
   {
     id: 4,
-    title: "Protein Powder",
+    title: "4K Streaming Essentials Bundle",
     discount: "35% OFF",
-    originalPrice: 5500,
-    salePrice: 3575,
+    originalPrice: 24999,
+    salePrice: 16249,
     image: "/images/no-image.jpg",
-    href: "/shop/protein-powder",
+    href: "/shop/4k-streaming-bundle",
   },
   {
     id: 5,
-    title: "Herbal Immunity Boost",
+    title: "Self-Care Luxe Set",
     discount: "28% OFF",
-    originalPrice: 3200,
-    salePrice: 2304,
+    originalPrice: 12999,
+    salePrice: 9359,
     image: "/images/no-image.jpg",
-    href: "/shop/immunity-boost",
+    href: "/shop/self-care-luxe-set",
   },
 ];
 
@@ -155,7 +155,7 @@ export default function TopOffers() {
               fontSize: { xs: 14, md: 16 },
             }}
           >
-            Save Up To 30% on Supplements
+            Curated tech, fashion, and lifestyle steals updated daily
           </Typography>
         </Box>
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
@@ -262,7 +262,7 @@ export default function TopOffers() {
                     },
                   }}
                 >
-                  <Box
+                  {/* <Box
                     sx={{
                       position: "absolute",
                       top: 12,
@@ -282,7 +282,7 @@ export default function TopOffers() {
                   >
                     <LocalOfferIcon sx={{ fontSize: 14 }} />
                     {offer.discount}
-                  </Box>
+                  </Box> */}
 
                   <Box
                     sx={{
@@ -352,8 +352,8 @@ export default function TopOffers() {
                       fullWidth
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Add to bag functionality
-                        console.log("Add to bag:", offer.id);
+                        // TODO: Add to cart functionality
+                        console.log("Add to cart:", offer.id);
                       }}
                       sx={{
                         bgcolor: "var(--color-primary)",
@@ -366,7 +366,7 @@ export default function TopOffers() {
                         },
                       }}
                     >
-                      Add to Bag
+                      Add to Cart
                     </Button>
                   </CardContent>
                 </Card>

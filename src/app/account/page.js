@@ -19,7 +19,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EditIcon from "@mui/icons-material/Edit";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -46,7 +46,7 @@ export default function AccountPage() {
   };
 
   const quickActions = [
-    { icon: ShoppingBagIcon, label: "My Orders", href: "/orders", color: "var(--color-primary)" },
+    { icon: ShoppingCartIcon, label: "My Orders", href: "/orders", color: "var(--color-primary)" },
     { icon: ReceiptIcon, label: "Order History", href: "/order-history", color: "#10b981" },
     { icon: FavoriteIcon, label: "Wishlist", href: "/wishlist", color: "#ef4444" },
     { icon: SettingsIcon, label: "Settings", href: "/settings", color: "var(--color-muted-text)" },
@@ -525,7 +525,7 @@ export default function AccountPage() {
                       justifyContent: "center",
                     }}
                   >
-                    <ShoppingBagIcon sx={{ fontSize: 20, color: "var(--color-primary)" }} />
+                    <ShoppingCartIcon sx={{ fontSize: 20, color: "var(--color-primary)" }} />
                   </Box>
                   <Typography
                     variant="h6"

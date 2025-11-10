@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import {
   Box,
@@ -16,69 +15,38 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useTheme } from "../../components/ThemeProvider";
-
-// Sample cart items
-const cartItems = [
-  {
-    id: 1,
-    name: "Paracetamol 500mg",
-    dosage: "Tablets - 10's",
-    price: 250,
-    originalPrice: 300,
-    quantity: 2,
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 2,
-    name: "Ibuprofen 400mg",
-    dosage: "Tablets - 10's",
-    price: 350,
-    originalPrice: 400,
-    quantity: 1,
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-  {
-    id: 3,
-    name: "Vitamin C 1000mg",
-    dosage: "Tablets - 30's",
-    price: 850,
-    originalPrice: 950,
-    quantity: 1,
-    image: "/images/no-image.jpg",
-    inStock: true,
-  },
-];
+import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [items, setItems] = useState(cartItems);
+  const { items, updateItemQuantity, removeItem, clearCart, subtotal } = useCart();
 
   const handleQuantityChange = (id, change) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
+    const item = items.find((entry) => String(entry.id) === String(id));
+    if (!item) return;
+    const newQuantity = item.quantity + change;
+    if (newQuantity <= 0) {
+      removeItem(id);
+    } else {
+      updateItemQuantity(id, newQuantity);
+    }
   };
 
   const handleRemoveItem = (id) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    removeItem(id);
   };
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalDiscount = items.reduce(
-    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
-    0
-  );
+  const totalDiscount = items.reduce((sum, item) => {
+    const original = item.originalPrice ?? item.price ?? 0;
+    const current = item.price ?? 0;
+    const quantity = item.quantity ?? 0;
+    return sum + Math.max(0, original - current) * quantity;
+  }, 0);
   const shipping = subtotal > 2000 ? 0 : 150;
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
@@ -126,10 +94,10 @@ export default function CartPage() {
                   fontSize: { xs: 24, md: 32 },
                 }}
               >
-                Shopping Bag
+                Shopping Cart
               </Typography>
               <Typography variant="body1" sx={{ color: "var(--color-muted-text)", fontSize: { xs: 14, md: 16 } }}>
-                {items.length} item{items.length !== 1 ? "s" : ""} in your bag
+                {items.length} item{items.length !== 1 ? "s" : ""} in your cart
               </Typography>
             </Box>
           </Box>
@@ -156,7 +124,7 @@ export default function CartPage() {
                 mb: 4,
               }}
             >
-              <ShoppingBagIcon
+              <ShoppingCartIcon
                 sx={{
                   fontSize: { xs: 64, md: 80 },
                   color: "var(--color-primary)",
@@ -173,7 +141,7 @@ export default function CartPage() {
                 fontSize: { xs: 22, md: 28 },
               }}
             >
-              Your bag is empty
+              Your cart is empty
             </Typography>
             <Typography
               variant="body1"
@@ -185,7 +153,7 @@ export default function CartPage() {
                 margin: "0 auto",
               }}
             >
-              Start shopping to add items to your bag and checkout when you're ready.
+              Start shopping to add items to your cart and checkout when you're ready.
             </Typography>
             <Button
               component={Link}
@@ -319,16 +287,29 @@ export default function CartPage() {
                             >
                               {item.name}
                             </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "var(--color-muted-text)",
-                                fontSize: { xs: 12, md: 13 },
-                                mb: 1.5,
-                              }}
-                            >
-                              {item.dosage}
-                            </Typography>
+                            {(() => {
+                              const detailLine =
+                                item.dosage ??
+                                item.raw?.dosage ??
+                                item.raw?.code ??
+                                item.raw?.description ??
+                                "";
+                              if (!detailLine) {
+                                return null;
+                              }
+                              return (
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: "var(--color-muted-text)",
+                                    fontSize: { xs: 12, md: 13 },
+                                    mb: 1.5,
+                                  }}
+                                >
+                                  {detailLine}
+                                </Typography>
+                              );
+                            })()}
 
                             {/* Price */}
                             <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, mb: 2.5, flexWrap: "wrap" }}>
