@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Container,
@@ -20,11 +21,36 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useTheme } from "../../components/ThemeProvider";
 import { useCart } from "@/context/CartContext";
+import { useCallback, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 export default function CartPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { items, updateItemQuantity, removeItem, clearCart, subtotal } = useCart();
+  const { items, updateItemQuantity, removeItem, subtotal } = useCart();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const readAuthCookie = useCallback(() => {
+    try {
+      const raw = Cookies.get("authUser");
+      if (!raw) {
+        setIsAuthenticated(false);
+        return;
+      }
+      JSON.parse(raw);
+      setIsAuthenticated(true);
+    } catch (error) {
+      Cookies.remove("authUser");
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    readAuthCookie();
+    window.addEventListener("auth-changed", readAuthCookie);
+    return () => window.removeEventListener("auth-changed", readAuthCookie);
+  }, [readAuthCookie]);
 
   const handleQuantityChange = (id, change) => {
     const item = items.find((entry) => String(entry.id) === String(id));
@@ -41,6 +67,17 @@ export default function CartPage() {
     removeItem(id);
   };
 
+  const handleCheckout = () => {
+    if (items.length === 0) {
+      return;
+    }
+    if (isAuthenticated) {
+      router.push("/checkout");
+    } else {
+      router.push("/login?redirect=/checkout");
+    }
+  };
+
   const totalDiscount = items.reduce((sum, item) => {
     const original = item.originalPrice ?? item.price ?? 0;
     const current = item.price ?? 0;
@@ -48,8 +85,7 @@ export default function CartPage() {
     return sum + Math.max(0, original - current) * quantity;
   }, 0);
   const shipping = subtotal > 2000 ? 0 : 150;
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shipping;
 
   return (
     <Box
@@ -542,16 +578,7 @@ export default function CartPage() {
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Typography variant="body2" sx={{ color: "var(--color-muted-text)", fontSize: { xs: 13, md: 14 } }}>
-                        Tax (8%)
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "var(--color-text)", fontWeight: 600, fontSize: { xs: 14, md: 15 } }}>
-                        Rs. {tax.toLocaleString()}
-                      </Typography>
-                    </Box>
-
-                    <Divider sx={{ borderColor: "var(--color-border)", my: 1 }} />
+                  <Divider sx={{ borderColor: "var(--color-border)", my: 1 }} />
 
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography
@@ -596,8 +623,7 @@ export default function CartPage() {
 
                   {/* Checkout Button */}
                   <Button
-                    component={Link}
-                    href="/login?redirect=/checkout"
+                    onClick={handleCheckout}
                     variant="contained"
                     fullWidth
                     sx={{
