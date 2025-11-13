@@ -25,6 +25,9 @@ import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useTheme } from "../../components/ThemeProvider";
+import { apiUrl } from "../../lib/apiConfig";
+import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 function LoginForm() {
   const router = useRouter();
@@ -56,13 +59,59 @@ function LoginForm() {
     }
 
     setLoading(true);
-    
-    // Simulate login process
-    setTimeout(() => {
-      setLoading(false);
-      // Navigate based on redirect parameter
+
+    try {
+      const response = await fetch(apiUrl("ECommerce/LoginECommerceCustomer"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Email: email.trim(),
+          Password: password,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          (data && (data.message || data.error || data?.Message)) ||
+          "Unable to sign in. Please check your credentials and try again.";
+        throw new Error(message);
+      }
+
+      const cookiePayload = {
+        email: email.trim(),
+        rememberMe,
+        user: data,
+        timestamp: Date.now(),
+      };
+
+      Cookies.set("authUser", JSON.stringify(cookiePayload), {
+        expires: rememberMe ? 30 : undefined,
+      });
+
+      window.dispatchEvent(new Event("auth-changed"));
+
+      Swal.fire({
+        icon: "success",
+        title: "Welcome back!",
+        text: "You have signed in successfully.",
+      });
+
       router.push(redirectTo);
-    }, 1000);
+    } catch (err) {
+      const message = err?.message || "Something went wrong. Please try again.";
+      setError(message);
+      Swal.fire({
+        icon: "error",
+        title: "Sign in failed",
+        text: message,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,8 +127,23 @@ function LoginForm() {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={{ xs: 6, md: 8 }} alignItems="stretch">
-          <Grid item xs={12} md={6}>
+        <Grid
+          container
+          spacing={{ xs: 6, md: 8 }}
+          alignItems="stretch"
+          sx={{
+            flexDirection: { xs: "column", md: "row" },
+            flexWrap: { xs: "wrap", md: "nowrap" },
+          }}
+        >
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              order: { xs: 2, md: 1 },
+            }}
+          >
             <Box
               sx={{
                 height: "100%",
@@ -209,7 +273,14 @@ function LoginForm() {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              order: { xs: 1, md: 2 },
+            }}
+          >
         <Card
           sx={{
                 borderRadius: 4,
@@ -402,7 +473,7 @@ function LoginForm() {
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: { xs: 15, md: 16 },
-                      py: { xs: 1.4, md: 1.5 },
+                    py: { xs: 1.4, md: 1.5 },
                     borderRadius: 2,
                     boxShadow: "0 4px 12px rgba(0, 119, 182, 0.3)",
                     "&:hover": {
@@ -415,73 +486,17 @@ function LoginForm() {
                       color: "var(--color-muted-text)",
                     },
                     transition: "all 250ms ease",
-                    }}
-                  >
-                    {loading ? (
-                      <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
-                        <CircularProgress size={18} thickness={5} sx={{ color: "white" }} />
-                        <span>Signing in...</span>
-                      </Stack>
-                    ) : (
-                      "Sign In"
-                    )}
+                  }}
+                >
+                  {loading ? (
+                    <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+                      <CircularProgress size={18} thickness={5} sx={{ color: "white" }} />
+                      <span>Signing in...</span>
+                    </Stack>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
-
-                  <Divider sx={{ my: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "var(--color-muted-text)",
-                        px: 1.5,
-                  fontSize: 12,
-                        textTransform: "uppercase",
-                        letterSpacing: 1.2,
-                }}
-              >
-                      or continue with
-              </Typography>
-            </Divider>
-
-                  <Stack spacing={1}>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        py: 1,
-                        borderColor: "var(--color-border)",
-                        color: "var(--color-text)",
-                        "&:hover": {
-                          borderColor: "var(--color-primary)",
-                          color: "var(--color-primary)",
-                          background: "var(--color-primary)08",
-                        },
-                      }}
-                    >
-                      Continue with Google
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        py: 1,
-                        borderColor: "var(--color-border)",
-                        color: "var(--color-text)",
-                        "&:hover": {
-                          borderColor: "var(--color-primary)",
-                          color: "var(--color-primary)",
-                          background: "var(--color-primary)08",
-                        },
-                      }}
-                    >
-                      Continue with Microsoft
-                    </Button>
-                  </Stack>
 
                   <Box sx={{ textAlign: "center", mt: 1 }}>
               <Typography
@@ -506,51 +521,6 @@ function LoginForm() {
                   </Box>
                 </Box>
 
-            {/* Divider */}
-            <Divider sx={{ my: 3, borderColor: "var(--color-border)" }} />
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Box
-                  sx={{
-                    background: "var(--color-background)",
-                    borderRadius: 2,
-                    p: 2,
-                    height: "100%",
-                    border: "1px solid var(--color-border)",
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 700, color: "var(--color-text)", mb: 0.5, fontSize: 14 }}>
-                    Need help?
-                  </Typography>
-                  <Typography sx={{ color: "var(--color-muted-text)", fontSize: 12, lineHeight: 1.5 }}>
-                    Our care team is on standby.{" "}
-                    <Link href="tel:+940773771726" style={{ color: "var(--color-primary)", textDecoration: "none" }}>
-                      Call or chat with us
-                    </Link>{" "}
-                    for any assistance with your account.
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box
-                  sx={{
-                    background: "var(--color-background)",
-                    borderRadius: 2,
-                    p: 2,
-                    height: "100%",
-                    border: "1px solid var(--color-border)",
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 700, color: "var(--color-text)", mb: 0.5, fontSize: 14 }}>
-                    New to Opus?
-                  </Typography>
-                  <Typography sx={{ color: "var(--color-muted-text)", fontSize: 12, lineHeight: 1.5 }}>
-                    Track prescriptions, refill in seconds, and earn loyalty rewards on every purchase.
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
           </CardContent>
         </Card>
       </Grid>

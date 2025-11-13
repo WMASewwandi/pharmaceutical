@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
@@ -9,13 +10,28 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, IconButton, Box, Typography, Drawer, List, ListItemButton, ListItemText } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Box,
+  Typography,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemText,
+  Stack,
+  Menu,
+  MenuItem,
+  Divider as MuiDivider,
+} from "@mui/material";
 import Badge from "@mui/material/Badge";
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
+import Cookies from "js-cookie";
+import Swal from "sweetalert2";
 
 export default function SiteHeader() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,6 +40,23 @@ export default function SiteHeader() {
   const helpline = "(+94) 077 377 1726";
   const isHomePage = pathname === "/";
   const shouldShowBackground = scrolled || !isHomePage;
+  const [authUser, setAuthUser] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const readAuthCookie = useCallback(() => {
+    try {
+      const raw = Cookies.get("authUser");
+      if (!raw) {
+        setAuthUser(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setAuthUser(parsed);
+    } catch (error) {
+      setAuthUser(null);
+      Cookies.remove("authUser");
+    }
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -39,6 +72,58 @@ export default function SiteHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    readAuthCookie();
+    window.addEventListener("auth-changed", readAuthCookie);
+    return () => window.removeEventListener("auth-changed", readAuthCookie);
+  }, [readAuthCookie]);
+
+  const isAuthenticated = Boolean(authUser);
+  const userDetails = authUser?.user;
+  const displayName =
+    (userDetails?.fullName ?? userDetails?.FullName) ||
+    (userDetails?.firstName && userDetails?.lastName
+      ? `${userDetails.firstName} ${userDetails.lastName}`
+      : userDetails?.firstName ||
+        userDetails?.FirstName ||
+        (authUser?.email ?? "My Account"));
+
+  const accountHref = isAuthenticated ? "/account" : "/login";
+  const checkoutHref = isAuthenticated ? "/checkout" : "/login?redirect=/checkout";
+
+  const handleLogout = () => {
+    Swal.fire({
+      icon: "question",
+      title: "Sign out?",
+      text: "Are you sure you want to log out?",
+      showCancelButton: true,
+      confirmButtonText: "Log out",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "var(--color-primary)",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Cookies.remove("authUser");
+        window.dispatchEvent(new Event("auth-changed"));
+        Swal.fire({
+          icon: "success",
+          title: "Signed out",
+          text: "You have been logged out successfully.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        router.push("/login");
+      }
+    });
+  };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   const navLinks = [
     { href: "/", label: "HOME" },
     { href: "/shop", label: "SHOP" },
@@ -51,9 +136,9 @@ export default function SiteHeader() {
   ];
 
   const ctaLinks = [
-    { href: "/account", label: "My Account" },
+    { href: accountHref, label: isAuthenticated ? "My Account" : "Sign In" },
     { href: "/cart", label: "View Cart" },
-    { href: "/checkout", label: "Checkout" },
+    { href: checkoutHref, label: "Checkout" },
   ];
 
   return (
@@ -149,23 +234,63 @@ export default function SiteHeader() {
                 gap: 1.5,
               }}
             >
-              <IconButton
-                component={Link}
-                href="/account"
-                aria-label="Account"
-                sx={{
-                  color: "inherit",
-                  width: 38,
-                  height: 38,
-                }}
-                size="small"
+              {isAuthenticated && (
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: "var(--color-muted-text)" }}>
+                  {displayName}
+                </Typography>
+              )}
+              {isAuthenticated ? (
+                <IconButton
+                  aria-label="Account menu"
+                  onClick={handleMenuOpen}
+                  sx={{
+                    color: "inherit",
+                    width: 38,
+                    height: 38,
+                  }}
+                  size="small"
+                >
+                  <AccountCircleOutlinedIcon fontSize="small" />
+                </IconButton>
+              ) : (
+                <IconButton
+                  component={Link}
+                  href={accountHref}
+                  aria-label="Account"
+                  sx={{
+                    color: "inherit",
+                    width: 38,
+                    height: 38,
+                  }}
+                  size="small"
+                >
+                  <AccountCircleOutlinedIcon fontSize="small" />
+                </IconButton>
+              )}
+              <Menu
+                anchorEl={anchorEl}
+                open={isAuthenticated && Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <AccountCircleOutlinedIcon fontSize="small" />
-              </IconButton>
+                <MenuItem component={Link} href="/account" onClick={handleMenuClose}>
+                  My Account
+                </MenuItem>
+                <MuiDivider />
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
+                    handleLogout();
+                  }}
+                >
+                  Logout
+                </MenuItem>
+              </Menu>
 
               <IconButton
                 component={Link}
-                href="/cart"
+                href={isAuthenticated ? "/cart" : "/login?redirect=/cart"}
                 aria-label="Cart"
                 sx={{
                   color: "inherit",
@@ -212,7 +337,7 @@ export default function SiteHeader() {
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "center",
-                gap: 1.5,
+            gap: 1.5,
               }}
             >
               {navLinks.map((link) => {
@@ -253,6 +378,28 @@ export default function SiteHeader() {
                   </Button>
                 );
               })}
+          {!isAuthenticated && (
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ ml: 2 }}>
+              <Button
+                component={Link}
+                href={accountHref}
+                variant="contained"
+                sx={{
+                  bgcolor: "var(--color-primary)",
+                  color: "white",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  px: 2.5,
+                  '&:hover': {
+                    bgcolor: "var(--color-secondary)",
+                  },
+                }}
+              >
+                Sign In
+              </Button>
+            </Stack>
+          )}
             </Box>
           </Box>
         </Box>
@@ -369,7 +516,7 @@ export default function SiteHeader() {
         <IconButton component={Link} href="/cart" aria-label="Cart" sx={{ color: "inherit" }}>
           <ShoppingCartOutlinedIcon />
         </IconButton>
-        <IconButton component={Link} href="/account" aria-label="Account" sx={{ color: "inherit" }}>
+        <IconButton component={Link} href={accountHref} aria-label="Account" sx={{ color: "inherit" }}>
           <PersonOutlinedIcon />
         </IconButton>
       </Box>
