@@ -1,96 +1,179 @@
 "use client";
 
 import Link from "next/link";
-import { Box, Card, CardContent, Typography, IconButton, Button, Grid } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Box, Card, CardContent, Typography, IconButton, Button } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTheme } from "./ThemeProvider";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import { useCart } from "@/context/CartContext";
+import { apiUrl } from "@/lib/apiConfig";
 
-const offers = [
-  {
-    id: 1,
-    title: "Wireless Noise-Cancelling Headphones",
-    discount: "32% OFF",
-    originalPrice: 45999,
-    salePrice: 31279,
-    image: "/images/no-image.jpg",
-    href: "/shop/wireless-headphones",
-  },
-  {
-    id: 2,
-    title: "Smart Home Starter Kit",
-    discount: "25% OFF",
-    originalPrice: 29999,
-    salePrice: 22499,
-    image: "/images/no-image.jpg",
-    href: "/shop/smart-home-starter",
-  },
-  {
-    id: 3,
-    title: "Designer Sneaker Duo",
-    discount: "30% OFF",
-    originalPrice: 19999,
-    salePrice: 13999,
-    image: "/images/no-image.jpg",
-    href: "/shop/designer-sneaker-duo",
-  },
-  {
-    id: 4,
-    title: "4K Streaming Essentials Bundle",
-    discount: "35% OFF",
-    originalPrice: 24999,
-    salePrice: 16249,
-    image: "/images/no-image.jpg",
-    href: "/shop/4k-streaming-bundle",
-  },
-  {
-    id: 5,
-    title: "Self-Care Luxe Set",
-    discount: "28% OFF",
-    originalPrice: 12999,
-    salePrice: 9359,
-    image: "/images/no-image.jpg",
-    href: "/shop/self-care-luxe-set",
-  },
-];
+const FALLBACK_IMAGE = "/images/no-image.jpg";
+const DEALS_LIMIT = 10;
+const CAROUSEL_DUPLICATION_COUNT = 3;
+const DEALS_ENDPOINT = apiUrl("Items/GetAllItemsForWeb");
+
+const normalizeDeal = (item, index) => {
+  const rawId = item?.id ?? item?.itemId ?? item?.internalId ?? item?.code ?? `deal-${index}`;
+  const id = String(rawId);
+  const title =
+    item?.name ??
+    item?.productName ??
+    item?.itemName ??
+    `Deal ${index + 1}`;
+  const salePrice = Number(
+    item?.discountedPrice ?? item?.price ?? item?.averagePrice ?? item?.sellingPrice ?? 0
+  ) || 0;
+  const originalCandidate =
+    item?.originalPrice ?? item?.mrp ?? item?.listPrice ?? item?.price ?? salePrice;
+  const originalPrice = Number(originalCandidate) > 0 ? Number(originalCandidate) : salePrice;
+  const image =
+    typeof item?.productImage === "string" && item.productImage.trim() !== ""
+      ? item.productImage
+      : FALLBACK_IMAGE;
+
+  const computedDiscount =
+    originalPrice > salePrice && salePrice >= 0
+      ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+      : null;
+  const discountPercentage =
+    item?.discountPercentage ??
+    item?.discountPercent ??
+    computedDiscount;
+  const discountLabel =
+    typeof discountPercentage === "number" && Number.isFinite(discountPercentage) && discountPercentage > 0
+      ? `${Math.round(discountPercentage)}% OFF`
+      : null;
+
+  return {
+    id,
+    title,
+    salePrice,
+    originalPrice: originalPrice >= salePrice ? originalPrice : salePrice,
+    image,
+    discountLabel,
+    href: `/shop?product=${encodeURIComponent(id)}`,
+    inStock: item?.isActive !== false,
+    raw: item,
+  };
+};
 
 export default function TopOffers() {
   const [cardsPerView, setCardsPerView] = useState(5);
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
-  // For circular carousel, duplicate items for seamless infinite loop
-  // Desktop: [set1][set2][set3] = [0-4][5-9][10-14] - 5 items per view
-  // Mobile: All items individually - 1 item per view
-  const circularOffers = [...offers, ...offers, ...offers];
-  const [actualIndex, setActualIndex] = useState(offers.length); // Start at middle set
+  const { addItem, items: cartItems } = useCart();
+  const [rawItems, setRawItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [actualIndex, setActualIndex] = useState(0);
 
   useEffect(() => {
     const updateCardsPerView = () => {
-      const width = window.innerWidth;
-      const newCardsPerView = width >= 768 ? 5 : 1;
-      setCardsPerView(newCardsPerView);
+      const width = typeof window === "undefined" ? 0 : window.innerWidth;
+      setCardsPerView(width >= 768 ? 5 : 1);
     };
+
     updateCardsPerView();
     window.addEventListener("resize", updateCardsPerView);
     return () => window.removeEventListener("resize", updateCardsPerView);
   }, []);
 
-  // Reset actualIndex when cardsPerView changes to ensure smooth transitions
   useEffect(() => {
-    setActualIndex(offers.length);
-  }, [cardsPerView]);
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
+
+    const payload = {
+      input: {
+        skipCount: 0,
+        maxResultCount: DEALS_LIMIT * 3,
+        search: "",
+      },
+      categoryIds: null,
+      subCategoryIds: null,
+      sortType: 1,
+    };
+
+    fetch(DEALS_ENDPOINT, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || (data && data.statusCode && data.statusCode !== 200)) {
+          throw new Error(data?.message || "Failed to load products");
+        }
+        const result = data?.result ?? {};
+        const items = Array.isArray(result.items) ? result.items : [];
+        setRawItems(items);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          setError(err.message || "Failed to load today's deals");
+          setRawItems([]);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const deals = useMemo(
+    () => {
+      if (!Array.isArray(rawItems) || rawItems.length === 0) {
+        return [];
+      }
+      const normalized = rawItems.map((item, index) => normalizeDeal(item, index));
+      const withDiscount = normalized.filter((deal) => Boolean(deal.discountLabel));
+      const prioritized = withDiscount.length > 0 ? withDiscount : normalized;
+      return prioritized.slice(0, DEALS_LIMIT);
+    },
+    [rawItems]
+  );
+
+  const dealsLength = deals.length;
+  const hasDeals = dealsLength > 0;
+
+  const circularDeals = useMemo(() => {
+    if (!hasDeals) return [];
+    const duplicated = [];
+    for (let i = 0; i < CAROUSEL_DUPLICATION_COUNT; i += 1) {
+      duplicated.push(...deals);
+    }
+    return duplicated;
+  }, [deals, hasDeals]);
+
+  useEffect(() => {
+    if (hasDeals) {
+      setActualIndex(dealsLength);
+    } else {
+      setActualIndex(0);
+    }
+  }, [hasDeals, dealsLength, cardsPerView]);
+
+  const middleStart = hasDeals ? dealsLength : 0;
+  const middleEnd = hasDeals ? dealsLength * 2 - 1 : 0;
+  const itemWidthPercent = hasDeals && circularDeals.length > 0 ? 100 / circularDeals.length : 0;
+  const transformPercent = hasDeals ? (actualIndex - middleStart) * itemWidthPercent : 0;
 
   const handleNext = () => {
+    if (!hasDeals) return;
     setActualIndex((prev) => {
       const next = prev + 1;
-      // If we reach end of duplicated set, reset to middle set for seamless loop
-      // Wait for transition to complete before resetting
-      if (next >= offers.length * 2) {
+      if (next >= dealsLength * 2) {
         setTimeout(() => {
-          setActualIndex(offers.length);
+          setActualIndex(middleStart);
         }, 400);
       }
       return next;
@@ -98,37 +181,36 @@ export default function TopOffers() {
   };
 
   const handlePrev = () => {
+    if (!hasDeals) return;
     setActualIndex((prev) => {
       const next = prev - 1;
-      // If we go below start of middle set, jump to end of middle set for seamless loop
-      if (next < offers.length) {
-        const newIndex = offers.length * 2 - 1;
+      if (next < dealsLength) {
+        const resetIndex = middleEnd;
         setTimeout(() => {
-          setActualIndex(offers.length * 2 - 1);
+          setActualIndex(resetIndex);
         }, 400);
-        return newIndex;
+        return resetIndex;
       }
       return next;
     });
   };
 
-  // Calculate transform based on cardsPerView
-  // Transform is relative to the container width
-  // Mobile: Container is 1500% wide, each card is 6.67% of container (100% of viewport)
-  // Desktop: Container is 300% wide, each card is 6.67% of container (20% of viewport)
-  // So we always move by 6.67% of container per item = 100% / circularOffers.length
-  // OR we can use: (100 / cardsPerView) / (circularOffers.length / cardsPerView) = 100 / circularOffers.length
-  // Since container width = (100 / cardsPerView) * circularOffers.length
-  // Moving by one item = moving by (container width / items) = 100% / circularOffers.length of container
-  const itemWidthPercent = 100 / circularOffers.length; // 6.67% of container per item
-  const transformPercent = (actualIndex - offers.length) * itemWidthPercent;
+  const cartQuantities = useMemo(() => {
+    const map = new Map();
+    cartItems.forEach((item) => {
+      map.set(String(item.id), item.quantity ?? 0);
+    });
+    return map;
+  }, [cartItems]);
+
+  const placeholders = cardsPerView === 5 ? 5 : 1;
 
   return (
     <Box
       sx={{
         py: { xs: 4, md: 6 },
         px: { xs: 2, md: 3 },
-        maxWidth: '85vw',
+        maxWidth: "85vw",
         margin: "0 auto",
         background: "var(--color-background)",
         width: "100%",
@@ -145,7 +227,7 @@ export default function TopOffers() {
               mb: 0.5,
             }}
           >
-            Today's Deals
+            Featured Products
           </Typography>
           <Typography
             variant="body1"
@@ -161,9 +243,11 @@ export default function TopOffers() {
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
           <IconButton
             onClick={handlePrev}
+            disabled={!hasDeals}
             sx={{
               border: "1px solid var(--color-border)",
               color: "var(--color-text)",
+              opacity: hasDeals ? 1 : 0.4,
               "&:hover": {
                 borderColor: "var(--color-primary)",
                 color: "var(--color-primary)",
@@ -174,9 +258,11 @@ export default function TopOffers() {
           </IconButton>
           <IconButton
             onClick={handleNext}
+            disabled={!hasDeals}
             sx={{
               border: "1px solid var(--color-border)",
               color: "var(--color-text)",
+              opacity: hasDeals ? 1 : 0.4,
               "&:hover": {
                 borderColor: "var(--color-primary)",
                 color: "var(--color-primary)",
@@ -188,6 +274,12 @@ export default function TopOffers() {
         </Box>
       </Box>
 
+      {error && (
+        <Typography variant="body2" sx={{ color: "#dc2626", mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+
       <Box
         sx={{
           position: "relative",
@@ -196,202 +288,256 @@ export default function TopOffers() {
           width: "100%",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: { xs: 2, md: 3 },
-            transform: `translateX(-${transformPercent}%)`,
-            transition: "transform 400ms cubic-bezier(0.4, 0, 0.2, 1)",
-            // Container width: responsive based on cardsPerView
-            // Desktop: 300% (15 items showing 5 at a time)
-            // Mobile: 1500% (15 items showing 1 at a time)
-            width: `${(100 / cardsPerView) * circularOffers.length}%`,
-          }}
-        >
-          {circularOffers.map((offer, index) => {
-            // Card width calculation - responsive
-            // Mobile (cardsPerView = 1): Each card should be 100% of viewport minus gaps
-            // Desktop (cardsPerView = 5): Each card should be 20% of viewport minus gaps
-            const gapSize = cardsPerView === 5 ? 24 : 16;
-            const totalGapsPx = (circularOffers.length - 1) * gapSize;
-            
-            // Calculate card width based on container width
-            // Container width = (100 / cardsPerView) * circularOffers.length
-            // - Mobile: (100 / 1) * 15 = 1500% of viewport
-            // - Desktop: (100 / 5) * 15 = 300% of viewport
-            // Each card as % of container = 100% / circularOffers.length = 100% / 15 = 6.67%
-            // This gives us:
-            // - Mobile: 6.67% of 1500% = 100% of viewport ✓
-            // - Desktop: 6.67% of 300% = 20% of viewport ✓
-            // Account for gaps: subtract gap portion per card
-            const cardWidthPercent = 100 / circularOffers.length; // 6.67% of container
-            const gapPerCard = totalGapsPx / circularOffers.length;
-            const cardWidth = `calc(${cardWidthPercent}% - ${gapPerCard}px)`;
-            
-            return (
-              <Box
-                key={`${offer.id}-${index}`}
+        {isLoading && !hasDeals ? (
+          <Box
+            sx={{
+              display: "grid",
+              gap: { xs: 2, md: 3 },
+              gridTemplateColumns: { xs: "repeat(1, 1fr)", md: `repeat(${Math.min(placeholders, 5)}, 1fr)` },
+            }}
+          >
+            {Array.from({ length: placeholders }).map((_, index) => (
+              <Card
+                key={`deal-placeholder-${index}`}
                 sx={{
-                  flexShrink: 0,
-                  flexGrow: 0,
-                  width: cardWidth,
-                  minWidth: cardWidth,
-                  maxWidth: cardWidth,
-                  boxSizing: "border-box",
+                  height: 260,
+                  borderRadius: 3,
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-surface)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--color-muted-text)",
                 }}
               >
-              <Card
-                component={Link}
-                href={offer.href}
-                  sx={{
-                    height: "100%",
-                    position: "relative",
-                    cursor: "pointer",
-                    transition: "all 250ms ease",
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 3,
-                    boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.04)",
-                    overflow: "hidden",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: isDark 
-                        ? "0 8px 24px rgba(0, 119, 182, 0.3)" 
-                        : "0 8px 24px rgba(0, 119, 182, 0.12)",
-                      borderColor: "var(--color-primary)",
-                    },
-                  }}
-                >
-                  {/* <Box
-                    sx={{
-                      position: "absolute",
-                      top: 12,
-                      right: 12,
-                      bgcolor: "var(--color-primary)",
-                      color: "white",
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      zIndex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                    }}
-                  >
-                    <LocalOfferIcon sx={{ fontSize: 14 }} />
-                    {offer.discount}
-                  </Box> */}
+                Loading…
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              gap: { xs: 2, md: 3 },
+              transform: `translateX(-${transformPercent}%)`,
+              transition: "transform 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+              width: hasDeals ? `${(100 / cardsPerView) * circularDeals.length}%` : "100%",
+            }}
+          >
+            {hasDeals
+              ? circularDeals.map((deal, index) => {
+                  const gapSize = cardsPerView === 5 ? 24 : 16;
+                  const totalGapsPx = (circularDeals.length - 1) * gapSize;
+                  const cardWidthPercent = 100 / circularDeals.length;
+                  const gapPerCard = totalGapsPx / circularDeals.length;
+                  const cardWidth = `calc(${cardWidthPercent}% - ${gapPerCard}px)`;
+                  const quantityInCart = cartQuantities.get(deal.id) ?? 0;
+                  const isInCart = quantityInCart > 0;
 
-                  <Box
+                  return (
+                    <Box
+                      key={`${deal.id}-${index}`}
+                      sx={{
+                        flexShrink: 0,
+                        flexGrow: 0,
+                        width: cardWidth,
+                        minWidth: cardWidth,
+                        maxWidth: cardWidth,
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <Card
+                        component={Link}
+                        href={deal.href}
+                        sx={{
+                          height: "100%",
+                          position: "relative",
+                          cursor: "pointer",
+                          transition: "all 250ms ease",
+                          background: "var(--color-surface)",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: 3,
+                          boxShadow: isDark
+                            ? "0 2px 8px rgba(0,0,0,0.3)"
+                            : "0 2px 8px rgba(0,0,0,0.04)",
+                          overflow: "hidden",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: isDark
+                              ? "0 8px 24px rgba(0, 119, 182, 0.3)"
+                              : "0 8px 24px rgba(0, 119, 182, 0.12)",
+                            borderColor: "var(--color-primary)",
+                          },
+                        }}
+                      >
+                        {deal.discountLabel && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: 12,
+                              right: 12,
+                              bgcolor: "var(--color-primary)",
+                              color: "white",
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: 1,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              zIndex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
+                          >
+                            <LocalOfferIcon sx={{ fontSize: 14 }} />
+                            {deal.discountLabel}
+                          </Box>
+                        )}
+
+                        <Box
+                          sx={{
+                            height: 180,
+                            background: "var(--color-surface)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src={deal.image || FALLBACK_IMAGE}
+                            alt={deal.title}
+                            onError={(event) => {
+                              event.currentTarget.src = FALLBACK_IMAGE;
+                            }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </Box>
+
+                        <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: "var(--color-text)",
+                              fontWeight: 600,
+                              fontSize: { xs: 14, md: 16 },
+                              lineHeight: 1.4,
+                              minHeight: { xs: "40px", md: "48px" },
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                            }}
+                          >
+                            {deal.title}
+                          </Typography>
+                          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+                            <Typography
+                              sx={{
+                                fontSize: { xs: 18, md: 22 },
+                                fontWeight: 700,
+                                color: "var(--color-primary)",
+                              }}
+                            >
+                              Rs. {deal.salePrice.toLocaleString()}
+                            </Typography>
+                            {deal.originalPrice > deal.salePrice && (
+                              <Typography
+                                sx={{
+                                  fontSize: { xs: 12, md: 14 },
+                                  color: "var(--color-muted-text)",
+                                  textDecoration: "line-through",
+                                }}
+                              >
+                                Rs. {deal.originalPrice.toLocaleString()}
+                              </Typography>
+                            )}
+                          </Box>
+                          <Button
+                            variant={isInCart ? "outlined" : "contained"}
+                            fullWidth
+                            disabled={!deal.inStock}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              addItem(
+                                {
+                                  id: deal.id,
+                                  name: deal.title,
+                                  price: deal.salePrice,
+                                  image: deal.image,
+                                  raw: deal.raw,
+                                },
+                                1
+                              );
+                            }}
+                            sx={{
+                              bgcolor: isInCart ? "transparent" : "var(--color-primary)",
+                              color: isInCart ? "var(--color-primary)" : "white",
+                              textTransform: "none",
+                              fontWeight: 600,
+                              py: 1,
+                              "&:hover": {
+                                bgcolor: isInCart ? "var(--color-primary)08" : "var(--color-secondary)",
+                              },
+                            }}
+                          >
+                            {deal.inStock
+                              ? isInCart
+                                ? `Add another (${quantityInCart} in cart)`
+                                : "Add to Cart"
+                              : "Out of Stock"}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Box>
+                  );
+                })
+              : (
+                  <Card
                     sx={{
-                      height: 180,
-                      background: `var(--color-surface)`,
+                      width: "100%",
+                      height: 260,
+                      borderRadius: 3,
+                      border: "1px solid var(--color-border)",
+                      background: "var(--color-surface)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      position: "relative",
-                      overflow: "hidden",
+                      color: "var(--color-muted-text)",
                     }}
                   >
-                    <img
-                      src={offer.image || "/images/no-image.jpg"}
-                      alt={offer.title}
-                      onError={(e) => {
-                        e.target.src = "/images/no-image.jpg";
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Box>
-
-                  <CardContent sx={{ p: 2 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        color: "var(--color-text)",
-                        fontWeight: 600,
-                        mb: 1.5,
-                        fontSize: { xs: 14, md: 16 },
-                        lineHeight: 1.4,
-                        minHeight: { xs: "40px", md: "48px" },
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {offer.title}
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 1.5 }}>
-                      <Typography
-                        sx={{
-                          fontSize: { xs: 18, md: 22 },
-                          fontWeight: 700,
-                          color: "var(--color-primary)",
-                        }}
-                      >
-                        Rs. {offer.salePrice.toLocaleString()}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: { xs: 12, md: 14 },
-                          color: "var(--color-muted-text)",
-                          textDecoration: "line-through",
-                        }}
-                      >
-                        Rs. {offer.originalPrice.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // TODO: Add to cart functionality
-                        console.log("Add to cart:", offer.id);
-                      }}
-                      sx={{
-                        bgcolor: "var(--color-primary)",
-                        color: "white",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        py: 1,
-                        "&:hover": {
-                          bgcolor: "var(--color-secondary)",
-                        },
-                      }}
-                    >
-                      Add to Cart
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Box>
-            );
-          })}
-        </Box>
+                    No deals available right now. Please check back later.
+                  </Card>
+                )}
+          </Box>
+        )}
       </Box>
 
-      {/* Mobile navigation */}
       <Box sx={{ display: { xs: "flex", md: "none" }, justifyContent: "center", gap: 2, mt: 2 }}>
         <IconButton
           onClick={handlePrev}
+          disabled={!hasDeals}
           sx={{
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
+            opacity: hasDeals ? 1 : 0.4,
           }}
         >
           <ChevronLeftIcon />
         </IconButton>
         <IconButton
           onClick={handleNext}
+          disabled={!hasDeals}
           sx={{
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
+            opacity: hasDeals ? 1 : 0.4,
           }}
         >
           <ChevronRightIcon />
@@ -400,4 +546,3 @@ export default function TopOffers() {
     </Box>
   );
 }
-

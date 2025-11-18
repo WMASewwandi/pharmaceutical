@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Box,
   Container,
@@ -49,6 +50,34 @@ const PRODUCTS_ENDPOINT = apiUrl("Items/GetAllItemsForWeb");
 
 const makeSubKey = (categoryId, subcategoryId) => `${categoryId}::${subcategoryId}`;
 
+const parseQueryList = (params, keys) => {
+  if (!params) return [];
+  const normalizedKeys = Array.isArray(keys) ? keys : [keys];
+  const values = new Set();
+
+  normalizedKeys.forEach((key) => {
+    params.getAll(key).forEach((value) => {
+      if (!value) return;
+      value
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .forEach((part) => values.add(String(part)));
+    });
+  });
+
+  return Array.from(values);
+};
+
+const arraysShallowEqual = (left, right) => {
+  if (left === right) return true;
+  if (!Array.isArray(left) || !Array.isArray(right)) return false;
+  if (left.length !== right.length) return false;
+  const sortedLeft = [...left].sort();
+  const sortedRight = [...right].sort();
+  return sortedLeft.every((value, index) => value === sortedRight[index]);
+};
+
 export default function ShopPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -69,6 +98,8 @@ export default function ShopPage() {
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   const { addItem, updateItemQuantity, removeItem, items: cartItems } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const searchParamsKey = searchParams?.toString() ?? "";
 
   const toggleSectionExpansion = (categoryName) => {
     setExpandedSections((prev) =>
@@ -170,6 +201,85 @@ export default function ShopPage() {
 
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (!searchParams) return;
+
+    const categoryValuesSet = new Set(
+      parseQueryList(searchParams, ["category", "categories", "Category", "Categories"]).map(
+        (value) => String(value)
+      )
+    );
+
+    const rawSubcategoryValues = parseQueryList(searchParams, [
+      "subcategory",
+      "subcategories",
+      "subCategory",
+      "subCategories",
+    ]);
+
+    const normalizedSubcategoryKeys = new Set();
+
+    rawSubcategoryValues.forEach((value) => {
+      const trimmed = String(value).trim();
+      if (!trimmed || !trimmed.includes("::")) return;
+      const [categoryId, subId] = trimmed.split("::");
+      if (!categoryId || !subId) return;
+      const normalizedCategoryId = String(categoryId);
+      const normalizedSubId = String(subId);
+      normalizedSubcategoryKeys.add(makeSubKey(normalizedCategoryId, normalizedSubId));
+      categoryValuesSet.add(normalizedCategoryId);
+    });
+
+    const categoryValues = Array.from(categoryValuesSet);
+    const subcategoryValues = Array.from(normalizedSubcategoryKeys);
+    const searchParamValue =
+      searchParams.get("search") ?? searchParams.get("q") ?? searchParams.get("term");
+
+    let shouldResetPage = false;
+
+    if (categoryValues.length > 0) {
+      setSelectedCategories((prev) => {
+        if (arraysShallowEqual(prev, categoryValues)) {
+          return prev;
+        }
+        shouldResetPage = true;
+        return categoryValues;
+      });
+
+      setExpandedSections((prev) => {
+        const nextSet = new Set(prev);
+        categoryValues.forEach((value) => nextSet.add(value));
+        const next = Array.from(nextSet);
+        return arraysShallowEqual(prev, next) ? prev : next;
+      });
+    }
+
+    if (subcategoryValues.length > 0) {
+      setSelectedSubcategories((prev) => {
+        if (arraysShallowEqual(prev, subcategoryValues)) {
+          return prev;
+        }
+        shouldResetPage = true;
+        return subcategoryValues;
+      });
+    }
+
+    if (searchParamValue !== null && searchParamValue !== undefined) {
+      const normalizedSearchParam = String(searchParamValue);
+      setSearchQuery((prev) => {
+        if (prev === normalizedSearchParam) {
+          return prev;
+        }
+        shouldResetPage = true;
+        return normalizedSearchParam;
+      });
+    }
+
+    if (shouldResetPage) {
+      setCurrentPage(1);
+    }
+  }, [searchParamsKey]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
