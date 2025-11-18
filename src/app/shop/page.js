@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Box,
@@ -78,7 +78,7 @@ const arraysShallowEqual = (left, right) => {
   return sortedLeft.every((value, index) => value === sortedRight[index]);
 };
 
-export default function ShopPage() {
+function ShopPageContent() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [searchQuery, setSearchQuery] = useState("");
@@ -1203,6 +1203,29 @@ export default function ShopPage() {
         </Dialog>
       </Container>
     </Box>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            minHeight: "60vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--color-muted-text)",
+            fontWeight: 500,
+          }}
+        >
+          Loading shop…
+        </Box>
+      }
+    >
+      <ShopPageContent />
+    </Suspense>
   );
 }
 
