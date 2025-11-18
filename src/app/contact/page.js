@@ -17,6 +17,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SendIcon from "@mui/icons-material/Send";
 import { useTheme } from "../../components/ThemeProvider";
+import { createContact } from "@/lib/api/contact";
+import Swal from "sweetalert2";
 
 export default function ContactPage() {
   const { theme } = useTheme();
@@ -25,8 +27,7 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    subject: "",
+    phoneNumber: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
@@ -38,18 +39,54 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate form submission
-    setTimeout(() => {
-      setLoading(false);
-      alert("Thank you for your message! We'll get back to you soon.");
+    try {
+      Swal.fire({
+        title: "Sending message",
+        text: "Please wait while we submit your request.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        company: "",
+        package: "",
+        description: formData.message.trim(),
+        isRead: false,
+        isFeedback: false,
+      };
+
+      const response = await createContact(payload);
+      console.log("CreateContact response:", response);
+      Swal.fire({
+        icon: "success",
+        title: "Message sent!",
+        text: "Thank you for reaching out. We'll get back to you soon.",
+        confirmButtonColor: "var(--color-primary)",
+      });
       setFormData({
         name: "",
         email: "",
-        phone: "",
-        subject: "",
+        phoneNumber: "",
         message: "",
       });
-    }, 1000);
+    } catch (err) {
+      console.error("Contact form submission failed:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Submission failed",
+        text: err.message || "Failed to submit your message. Please try again.",
+        confirmButtonColor: "var(--color-primary)",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const contactInfo = [
@@ -199,9 +236,10 @@ export default function ContactPage() {
                         },
                       }}
                     />
-                    <Box sx={{ display: "flex", gap: 2 }}>
+                    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                       <TextField
                         fullWidth
+                        sx={{ flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" } }}
                         type="email"
                         label="Email Address"
                         value={formData.email}
@@ -237,10 +275,11 @@ export default function ContactPage() {
                       />
                       <TextField
                         fullWidth
+                        sx={{ flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" } }}
                         type="tel"
                         label="Phone Number"
-                        value={formData.phone}
-                        onChange={handleChange("phone")}
+                        value={formData.phoneNumber}
+                        onChange={handleChange("phoneNumber")}
                         placeholder="Optional"
                         InputProps={{
                           startAdornment: (
@@ -271,34 +310,6 @@ export default function ContactPage() {
                         }}
                       />
                     </Box>
-                    <TextField
-                      fullWidth
-                      label="Subject"
-                      value={formData.subject}
-                      onChange={handleChange("subject")}
-                      required
-                      placeholder="What is this regarding?"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          background: "var(--color-background)",
-                          "& fieldset": {
-                            borderColor: "var(--color-border)",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "var(--color-primary)",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "var(--color-primary)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "var(--color-muted-text)",
-                        },
-                        "& .MuiInputLabel-root.Mui-focused": {
-                          color: "var(--color-primary)",
-                        },
-                      }}
-                    />
                     <TextField
                       fullWidth
                       label="Message"

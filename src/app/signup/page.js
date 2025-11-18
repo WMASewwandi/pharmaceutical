@@ -165,7 +165,7 @@ function SignupForm() {
                   display: "block",
                 }}
               >
-                Opus Marketplace
+                OPUSWH
               </Typography>
               <Typography
                 variant="h3"

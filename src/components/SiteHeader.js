@@ -191,7 +191,7 @@ export default function SiteHeader() {
               <Box
                 component="img"
                 src="/images/logo.png"
-                alt="Opus Marketplace logo"
+                alt="OPUSWH logo"
                 sx={{
                       width: { xs: 56, md: 80 },
                       height: { xs: 56, md: 80 },
@@ -201,7 +201,7 @@ export default function SiteHeader() {
               />
                   <Box sx={{ lineHeight: 1.1, display: { xs: "none", md: "block" } }}>
                 <Typography component="span" sx={{ fontWeight: 700, fontSize: 20 }}>
-                  Opus Marketplace
+                  OPUSWH
                 </Typography>
                 <Typography component="span" sx={{ display: "block", fontSize: 13, color: "var(--color-text-muted, #725f3a)" }}>
                   Lifestyle & tech essentials online

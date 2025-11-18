@@ -31,7 +31,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
-  title: "Company | Pharmaceutical E‑commerce",
+  title: "OPUSWH | Pharmaceutical E‑commerce",
   description: "Trusted online pharmacy with curated healthcare products",
 };
 
