@@ -112,7 +112,7 @@ export default function Home() {
       <FeaturedCategories />
       <TopOffers />
       <UploadPrescription />
-      <FeaturedProducts />
+      {/* <FeaturedProducts /> */}
       <HealthBlog />
       <WhyChooseUs />
       <Newsletter />

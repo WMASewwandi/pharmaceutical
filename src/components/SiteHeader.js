@@ -128,9 +128,9 @@ export default function SiteHeader() {
     { href: "/", label: "HOME" },
     { href: "/shop", label: "SHOP" },
     { href: "/categories", label: "CATEGORIES" },
-    { href: "/deals", label: "DEALS" },
-    { href: "/new-arrivals", label: "NEW ARRIVALS" },
-    { href: "/best-sellers", label: "BEST SELLERS" },
+    // { href: "/deals", label: "DEALS" },
+    // { href: "/new-arrivals", label: "NEW ARRIVALS" },
+    // { href: "/best-sellers", label: "BEST SELLERS" },
     { href: "/about", label: "ABOUT US" },
     { href: "/contact", label: "CONTACT US" },
   ];
