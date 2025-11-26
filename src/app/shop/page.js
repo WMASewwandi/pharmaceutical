@@ -41,6 +41,7 @@ import { useTheme } from "../../components/ThemeProvider";
 import { fetchCategoriesWithCounts } from "@/lib/api/categories";
 import { apiUrl } from "@/lib/apiConfig";
 import { useCart } from "@/context/CartContext";
+import ProductDetailsModal from "@/components/ProductDetailsModal";
 
 const PAGE_SIZE = 9;
 const DEFAULT_CATEGORY_IDS = [];
@@ -100,6 +101,8 @@ function ShopPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const searchParams = useSearchParams();
   const searchParamsKey = searchParams?.toString() ?? "";
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const toggleSectionExpansion = (categoryName) => {
     setExpandedSections((prev) =>
@@ -454,6 +457,16 @@ function ShopPageContent() {
   const goToPage = (page) => {
     const clamped = Math.min(Math.max(page, 1), totalPages);
     setCurrentPage(clamped);
+  };
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedProduct(null);
   };
 
   return (
@@ -825,6 +838,7 @@ function ShopPageContent() {
                 }}
               >
                 <Box
+                  onClick={() => handleProductClick(product)}
                   sx={{
                     position: "relative",
                     background: "#ffffff",
@@ -833,6 +847,7 @@ function ShopPageContent() {
                     justifyContent: "center",
                     height: { xs: 240, md: 260 },
                     overflow: "hidden",
+                    cursor: "pointer",
                   }}
                 >
                   <CardMedia
@@ -889,10 +904,15 @@ function ShopPageContent() {
                    
                   <Typography
                       variant="h6"
+                      onClick={() => handleProductClick(product)}
                     sx={{
                       fontWeight: 600,
                       color: "var(--color-text)",
                         lineHeight: 1.3,
+                        cursor: "pointer",
+                        "&:hover": {
+                          color: "var(--color-primary)",
+                        },
                     }}
                   >
                     {product.name}
@@ -1201,6 +1221,12 @@ function ShopPageContent() {
             </Button>
           </DialogActions>
         </Dialog>
+
+        <ProductDetailsModal
+          open={modalOpen}
+          onClose={handleCloseModal}
+          product={selectedProduct}
+        />
       </Container>
     </Box>
   );
