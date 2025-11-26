@@ -10,6 +10,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useTheme } from "./ThemeProvider";
 import { apiUrl } from "@/lib/apiConfig";
 import { useCart } from "@/context/CartContext";
+import ProductDetailsModal from "./ProductDetailsModal";
 
 const FALLBACK_IMAGE = "/images/no-image.jpg";
 const FEATURED_COUNT = 4;
@@ -21,6 +22,8 @@ export default function FeaturedProducts() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -65,14 +68,18 @@ export default function FeaturedProducts() {
       products.map((item) => {
         const rawPrice = item?.averagePrice ?? item?.price ?? 0;
         const priceNumber = Number(rawPrice) || 0;
+        const originalPriceNumber = Number(item?.originalPrice ?? rawPrice) || priceNumber;
         return {
           id: item?.id ?? item?.internalId ?? item?.code ?? `product-${Math.random()}`,
           name: item?.name ?? "Unnamed product",
+          code: item?.code ?? "",
           price: priceNumber,
+          originalPrice: originalPriceNumber,
           image:
             typeof item?.productImage === "string" && item.productImage.trim() !== ""
               ? item.productImage
               : FALLBACK_IMAGE,
+          inStock: item?.isActive !== false,
           raw: item,
         };
       }),
@@ -99,6 +106,16 @@ export default function FeaturedProducts() {
     });
     return map;
   }, [cartItems]);
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   return (
     <Box
@@ -191,8 +208,8 @@ export default function FeaturedProducts() {
               }}
             >
               <Box
-                sx={
-                  {
+                onClick={() => handleProductClick(product)}
+                sx={{
                     width: "100%",
                     height: { xs: 200, md: 220 },
                     background: "#ffffff",
@@ -201,12 +218,7 @@ export default function FeaturedProducts() {
                     justifyContent: "center",
                     overflow: "hidden",
                     position: "relative",
-                  }
-                }
-              >
-                    <Link
-                      href={`/shop?product=${product.id}`}
-                      style={{ display: "block", width: "100%", height: "100%" }}
+                }}
                     >
                       <img
                         src={product.image}
@@ -219,17 +231,14 @@ export default function FeaturedProducts() {
                           height: "100%",
                           objectFit: "contain",
                           padding: 12,
+                    cursor: "pointer",
                         }}
                       />
-                    </Link>
               </Box>
 
               <CardContent sx={{ p: { xs: 1.5, md: 2 }, flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                    <Link
-                      href={`/shop?product=${product.id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
                       <Typography
+                  onClick={() => handleProductClick(product)}
                         variant="h6"
                         sx={{
                           fontWeight: 600,
@@ -242,11 +251,14 @@ export default function FeaturedProducts() {
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical",
                           overflow: "hidden",
+                    cursor: "pointer",
+                    "&:hover": {
+                      color: "var(--color-primary)",
+                    },
                         }}
                       >
                         {product.name}
                       </Typography>
-                    </Link>
 
                 <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", mb: 1.5 }}>
                   <Typography
@@ -387,7 +399,16 @@ export default function FeaturedProducts() {
           View All
         </Button>
       </Box>
+
+      <ProductDetailsModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        product={selectedProduct}
+      />
     </Box>
   );
 }
+
+
+
 
